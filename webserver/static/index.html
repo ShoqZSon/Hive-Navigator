@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baymax - Guide Service</title>
+    <!-- Local Bootstrap CSS -->
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS */
+        .header, .footer {
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+        .center-section {
+            text-align: center;
+            margin: 50px auto;
+        }
+        .dropdown {
+            margin: 10px auto;
+        }
+        .dropdown-menu {
+            display: none;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header bg-light">
+        <nav class="navbar navbar-light">
+            <a class="navbar-brand" href="index.html">Baymax</a>
+            <a class="navbar-brand" href="theProject.html">The Project</a>
+            <a class="navbar-brand" href="impressum.html">Impressum</a>
+        </nav>
+    </header>
+
+    <!-- Center Section -->
+    <div class="center-section">
+        <!-- First Dropdown -->
+        <!-- TODO: Change this button to a static location (location of the terminal) or the current location of the user (if used by phone) -->
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_loc" data-bs-toggle="dropdown" aria-expanded="false">
+            Select your location
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdown_loc">
+            <li><a class="dropdown-item">Loc 1</a></li>
+            <li><a class="dropdown-item">Loc 2</a></li>
+            <li><a class="dropdown-item">Loc 3</a></li>
+          </ul>
+        </div>
+
+        <!-- Second Dropdown -->
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_dest" data-bs-toggle="dropdown" aria-expanded="false">
+            Select your destination
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdown_dest">
+            <li><a class="dropdown-item">Dest 1</a></li>
+            <li><a class="dropdown-item">Dest 2</a></li>
+            <li><a class="dropdown-item">Dest 3</a></li>
+          </ul>
+        </div>
+
+        <!-- Button -->
+        <div class="mt-4">
+            <button class="btn btn-success">Send Baymax to my location!</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-light">
+        <p>© 2024 Baymax Corp. All rights reserved.</p>
+        <p>1234 Baymax St, Robo City, RC 56789</p>
+    </footer>
+
+    <!-- Local JS and dependencies -->
+    <script src="../../js/jquery.slim.js"></script>
+    <script src="../../js/popper.min.js"></script>
+    <script src="../../js/bootstrap.min.js"></script>
+    <script src="../../js/selectDropDownItem.js"></script>
+    <script src="../../js/buildJson.js"></script>
+</body>
+</html>
