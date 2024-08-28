@@ -3,11 +3,11 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 @app.route('/')
-def index():
+def main_page():
     return render_template('index.html')
 
 @app.route('/submit', methods=['POST'])
-def submit():
+def submit_task():
     location = request.form.get('location')
     destination = request.form.get('destination')
 
@@ -16,7 +16,7 @@ def submit():
     return redirect(url_for('success'))
 
 @app.route('/success')
-def success():
+def task_send_successfully():
     # TODO: Success page is supposed to show the current position of the bot + ETA
     return render_template('followBot.html')
 

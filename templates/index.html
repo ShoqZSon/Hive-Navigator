@@ -62,6 +62,7 @@
     </style>
 </head>
 <body>
+    <!-- Header -->
     <header class="header bg-light">
         <nav class="navbar navbar-light">
             <a class="navbar-brand" href="index.html">Baymax</a>
@@ -70,14 +71,14 @@
         </nav>
     </header>
 
+    <!-- Task Submition Form -->
     <form action="/submit" method="post" id="submitForm">
-        <!-- Center Section -->
         <div class="center-section">
             <!-- User Location Dropdown -->
             <!-- TODO: Change this button to a html location (location of the terminal) or the current location of the user (if used by phone) -->
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_loc" data-bs-toggle="dropdown" aria-expanded="false">
-                Select your location
+                    Select your location
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdown_loc">
                     <li><a class="dropdown-item" data-value="Loc1">Loc 1</a></li>
@@ -92,7 +93,7 @@
             <!-- Destination Dropdown -->
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_dest" data-bs-toggle="dropdown" aria-expanded="false">
-                Select your destination
+                    Select your destination
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdown_dest">
                     <li><a class="dropdown-item" data-value="Dest1">Dest 1</a></li>
@@ -105,8 +106,9 @@
             </div>
         </div>
 
-        <!-- Button for sending the data -->
+        <!-- Action Buttons -->
         <div class="buttons">
+            <!-- Button for sending the data -->
             <div class="mt-4">
                 <button class="btn btn-success" type="submit">
                     Send Baymax to my location!
@@ -128,13 +130,11 @@
         <p>1234 Baymax St, Robo City, RC 56789</p>
     </footer>
 
-    <!-- Local JS and dependencies -->
     <script src="../static/js/jquery.slim.js"></script>
     <script src="../static/js/popper.min.js"></script>
     <script src="../static/js/bootstrap.min.js"></script>
     <script src="../static/js/dropdownSync.js"></script>
     <script src="../static/js/dropDownToggle.js"></script>
-    <!-- <script src="../static/js/buildJson.js"></script> -->
     <script src="../static/js/resetButton.js"></script>
     <script src="../static/js/checkSubmitCondition.js"></script>
 </body>
