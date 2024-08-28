@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         // Display the JSON object
-        console.log('Generated JSON:', JSON.stringify(data, null, 2));
+        const userRequest = JSON.stringify(data, null, 2)
+
+        console.log('Generated JSON:', userRequest);
 
         // Optional: Display JSON on the page
         let resultDiv = document.getElementById('jsonResult');
