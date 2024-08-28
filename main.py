@@ -1,0 +1,24 @@
+from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    location = request.form.get('location')
+    destination = request.form.get('destination')
+
+    # Process the form data here
+    print(f"Location: {location}, Destination: {destination}")
+    return redirect(url_for('success'))
+
+@app.route('/success')
+def success():
+    # TODO: Success page is supposed to show the current position of the bot + ETA
+    return render_template('followBot.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
