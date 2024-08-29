@@ -1,6 +1,7 @@
 function resetLocDest() {
     resetLoc();
-    resetDest();
+    //resetDest();
+    resetDestTable();
 }
 
 function resetLoc() {
@@ -11,4 +12,13 @@ function resetLoc() {
 function resetDest() {
     const destination = document.getElementById("dropdown_dest");
     destination.textContent = "Select your destination";
+}
+
+function resetDestTable() {
+    const destTable = document.getElementById("destTable");
+
+    // Remove 'selected' class from all rows
+    destTable.querySelectorAll("tbody tr").forEach(row => {
+        row.classList.remove("selected");
+    });
 }

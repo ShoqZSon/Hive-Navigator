@@ -59,6 +59,16 @@
         .mt-4 {
             margin: 10px;
         }
+        .table {
+
+        }
+        #destTable tbody tr:hover {
+            background-color: lightgray;
+            cursor: pointer;
+        }
+        #destTable tbody tr.selected {
+            background-color: lightgreen;
+        }
     </style>
 </head>
 <body>
@@ -74,8 +84,7 @@
     <!-- Task Submition Form -->
     <form action="/submit" method="post" id="submitForm">
         <div class="center-section">
-            <!-- User Location Dropdown -->
-            <!-- TODO: Change this button to a html location (location of the terminal) or the current location of the user (if used by phone) -->
+            <!-- User Location -->
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_loc" data-bs-toggle="dropdown" aria-expanded="false">
                     Select your location
@@ -90,36 +99,54 @@
                 <input type="hidden" name="location" id="location">
             </div>
 
-            <!-- Destination Dropdown -->
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_dest" data-bs-toggle="dropdown" aria-expanded="false">
-                    Select your destination
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdown_dest">
-                    <li><a class="dropdown-item" data-value="Dest1">Dest 1</a></li>
-                    <li><a class="dropdown-item" data-value="Dest2">Dest 2</a></li>
-                    <li><a class="dropdown-item" data-value="Dest3">Dest 3</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" onclick="resetDest()">Reset selected destination</a></li>
-                </ul>
+            <!-- User Destination Table -->
+            <div class="table">
+                <!-- <h4>Select your destination</h4> -->
+                <table id="destTable">
+                    <thead id="dest_tableHead">
+                        <tr>
+                            <th>Stand-Name</th>
+                            <th>Stand-Nr</th>
+                            <th>Hallen-Nr</th>
+                            <th>Ebene</th>
+                            <th>Thema</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dest_tableBody">
+                        <tr>
+                            <td>TechInnovations</td>
+                            <td>101</td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>Technologie</td>
+                        </tr>
+                        <tr>
+                            <td>GreenEnergy Solutions</td>
+                            <td>205</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>Erneuerbare Energien</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <input type="hidden" name="destination" id="destination">
             </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="buttons">
-            <!-- Button for sending the data -->
-            <div class="mt-4">
-                <button class="btn btn-success" type="submit">
-                    Send Baymax to my location!
-                </button>
-            </div>
+            <!-- Action Buttons -->
+            <div class="buttons">
+                <!-- Button for sending the data -->
+                <div class="mt-4">
+                    <button class="btn btn-success" type="submit">
+                        Send Baymax to my location!
+                    </button>
+                </div>
 
-            <!-- Button to reset the dropdowns -->
-            <div class="mt-4">
-                <button class="btn btn-reset" type="button" onclick="resetLocDest()">
-                    Reset!
-                </button>
+                <!-- Button to reset the dropdowns -->
+                <div class="mt-4">
+                    <button class="btn btn-reset" type="button" onclick="resetLocDest()">
+                        Reset!
+                    </button>
+                </div>
             </div>
         </div>
     </form>
@@ -137,5 +164,6 @@
     <script src="../static/js/dropDownToggle.js"></script>
     <script src="../static/js/resetButton.js"></script>
     <script src="../static/js/checkSubmitCondition.js"></script>
+    <script src="../static/js/selectItemTable.js"></script>
 </body>
 </html>

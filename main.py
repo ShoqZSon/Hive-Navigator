@@ -7,7 +7,7 @@ def main_page():
     return render_template('index.html')
 
 @app.route('/submit', methods=['POST'])
-def submit_task():
+def submit():
     location = request.form.get('location')
     destination = request.form.get('destination')
 
@@ -16,7 +16,7 @@ def submit_task():
     return redirect(url_for('success'))
 
 @app.route('/success')
-def task_send_successfully():
+def success():
     # TODO: Success page is supposed to show the current position of the bot + ETA
     return render_template('followBot.html')
 
