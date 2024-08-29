@@ -34,7 +34,7 @@
     border-color: darkgray;
 }
 #btn-success:hover {
-    background-color: yellowgreen;
+    background-color: palegreen;
     color:black;
 }
 #btn-reset:hover {
@@ -48,7 +48,19 @@
 .table {
     display: flex;
     justify-content: center;
-    align-items: center;
+    padding: 20px;
+}
+#destTable th, #destTable td {
+    padding: 5px 30px 5px 30px;
+    text-wrap: nowrap;
+}
+#destTable th {
+    background-color: darkgray;
+    border: 1px solid #ddd;
+}
+.hidden {
+    background-color: white;
+    display: none;
 }
 #destTable tbody tr:hover {
     background-color: lightgray;
