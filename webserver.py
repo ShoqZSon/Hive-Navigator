@@ -7,7 +7,6 @@ app = Flask(__name__)
 def main_page():
     return render_template('index.html')
 
-
 @app.route('/submit', methods=['POST'])
 def submit():
     """/submit route is supposed to receive the data from index.html and sends it further
@@ -19,23 +18,29 @@ def submit():
     ---------
     -
 
-    :returns -
+    Important Variables
+    -------------------
+        location: right now -> string with one entry
+        destination: Stand-Name, Stand-Nr, Hallen-Nr, Ebene, Thema, x-coordinate, y-coordinate
+            After trimming -> Stand-Nr, Hallen-Nr, Ebene, x-coordinate, y-coordinate
+
     """
     location = request.form.get('location')
     destination = request.form.get('destination')
+
     # Process the form data here
     print(f"Location: {location}")
     print(f"Destination: {destination}")
 
-    # get the coordinates of the location, destination and the level
-
-    # implementation of sanitization here
-    # ...
-    print("Some sanitization happening here...")
+    # Removes the Stand-Name and the Thema because the robot does not need it
+    # TODO: location will need this as well
+    tmp = destination.split(",")
+    # TODO: Probably needs adaption since hard coding the elements to remove is inflexible
+    tmp.pop(0)
+    tmp.pop(3)
+    destination = ",".join(tmp)
 
     # send the data to hivemind server
-    # receive sending response
-    # proceed with showing the
     sD.sendDataTo(location, destination, '127.0.0.1',65432)
 
     return redirect(url_for('success'))
@@ -46,7 +51,6 @@ def success():
     It then proceeds to show the customer a map and an ETA of the robot towards their location
     """
     # TODO: Success page is supposed to show the current position of the bot + ETA
-
 
     return render_template('followBot.html')
 

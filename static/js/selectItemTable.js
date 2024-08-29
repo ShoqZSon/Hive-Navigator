@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const rowData = Array.from(this.cells).map(cell => cell.innerText);
 
             // Convert row data to a string (you can customize the format)
-            const rowString = rowData.join(", ");
+            const rowString = rowData.join(",");
 
             // Set the hidden input value to the row string
             destinationInput.value = rowString;
