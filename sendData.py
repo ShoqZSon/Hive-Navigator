@@ -2,7 +2,30 @@ import socket
 import json
 
 
-def send_data(location, destination, host, port):
+def sendDataTo(location, destination, host, port):
+    """Sends the data (location and destination) in json format towards the host and port
+
+    Arguments
+    ---------
+        location: str
+            location of the terminal the customer sent the task from
+        destination: str
+            desired destination of the customer
+        host: str
+            host address of the hivemind
+        port: int
+            port of the hivemind
+
+    Format of the data:
+            data = {
+                "location": str,
+                "destination": str
+            }
+
+    After sending we receive a response.
+
+    :returns -
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, port))
 
@@ -19,8 +42,9 @@ def send_data(location, destination, host, port):
         s.sendall(message.encode())
 
         # Receive response from the server
-        data = s.recv(1024)
-        print(f"Received {data.decode()} from server")
+        response = s.recv(1024)
+        print(f"Received {response.decode()} from server")
 
-        if data.decode() == "200":
+        if response.decode() == "success":
+            print("Data sent successfully")
             print("Closing connection.")
