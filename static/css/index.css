@@ -1,0 +1,59 @@
+.center-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+    margin: 10px;
+}
+
+.dropdown {
+    margin: 50px;
+}
+.dropdown-menu {
+    display: none;
+}
+.dropdown-menu.show {
+    display: block;
+}
+
+.btn {
+    width: 200px;
+    height: 60px;
+    padding: 5px;
+}
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+}
+#dropdown_loc, #btn-success, #btn-reset{
+    background-color: lightskyblue;
+    color: black;
+    border-color: darkgray;
+}
+#btn-success:hover {
+    background-color: yellowgreen;
+    color:black;
+}
+#btn-reset:hover {
+    background-color: indianred;
+    color: white;
+}
+.mt-4 {
+    margin: 10px;
+}
+
+.table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#destTable tbody tr:hover {
+    background-color: lightgray;
+    cursor: pointer;
+}
+#destTable tbody tr.selected {
+    background-color: lightgreen;
+}
