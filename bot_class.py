@@ -1,22 +1,47 @@
-import publisher as p
-import subscriber as s
-import threading
-import time
+from publisher import Publisher
+from subscriber import Subscriber
 import json
-import socket
+import time
 
-class Bot(p.Publisher,s.Subscriber):
-    """The Bot class is run on the bots themselves. It receives the best fitting task in terms of the distance between itself and the location of the customers.
-    It then proceeds to drive towards them while calculating the most efficient route.
-    The Bot class is derived by the Publisher and Subscriber class in order to Publish its own coordinates towards the hivemind for comparison and Subscribe to the hivemind for the tasks.
-    """
-    bot_id = 0
-    def __init__(self,hivemind_host='127.0.0.1',hivemind_port=65432):
-        """Receives the parameters of Publisher and Subscriber:
-            Publisher:
-                Array of subscribers -> subscribers = []
-            Subscriber:
+class Bot(Publisher, Subscriber):
+    def __init__(self, messageBrokerHost, messageBrokerPort, level=0, hall=0):
+        Publisher.__init__(self, host=messageBrokerHost, port=messageBrokerPort, routing_key='currLoc')
+        Subscriber.__init__(self, host=messageBrokerHost, port=messageBrokerPort, queue='taskQueue')
 
+        self.hall = hall
+        self.level = level
+        self.ownCoordinates = {'x': 0, 'y': 0}
 
-        """
-        super().__init__()
+    def packData(self):
+        """Pack the bot's coordinates into a JSON string."""
+        data = {
+            'hall': self.hall,
+            'level': self.level,
+            'x': self.ownCoordinates['x'],
+            'y': self.ownCoordinates['y']
+        }
+        return json.dumps(data)
+
+    def publish_coordinates(self):
+        """Publish the bot's coordinates to the messageBroker."""
+        self.connect()
+        message = self.packData()
+        self.publish(message)
+        self.close()
+
+    def task_callback(self, ch, method, properties, body):
+        """Handle tasks received from the messageBroker."""
+        task = json.loads(body)
+        print(f" [x] Received task: {task}")
+        # Process the task here
+        for i in range(3):
+            self.drive()
+            time.sleep(0.5)
+
+    def start_listening_for_tasks(self):
+        """Start listening for tasks from the hivemind."""
+        self.connect()
+        self.start_consuming(callback=self.task_callback)
+
+    def drive(self):
+        print("Driving...")
