@@ -7,8 +7,16 @@ class Publisher:
         self.id = Publisher._id
         Publisher._id += 1
 
-    def publish(self):
-        pass
+    def publish(self, topic, message) -> None:
+        """
+        Publishes a message to all subscribers
+
+        :param topic: the topic of the publication
+        :param message: the message to publish
+        :return: None
+        """
+        print(f"Publishing message on topic: {topic}")
+        self.notifySubs(topic, message)
 
     def addSub(self, subscriber) -> None:
         """
