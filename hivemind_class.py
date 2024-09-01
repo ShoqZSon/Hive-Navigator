@@ -25,6 +25,8 @@ class Hivemind(Publisher,Subscriber):
         self.webserverHost = webserverHost
         self.webserverPort = webserverPort
         self.taskQueue = []
+        self.host = '192.168.56.104'
+        self.port = 65432
 
     def listenToConn(self):
         """This method starts listening towards the webserver (flask app) for incoming customer tasks and fills a queue with those tasks.
