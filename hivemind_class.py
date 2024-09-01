@@ -36,7 +36,7 @@ class Hivemind(Publisher,Subscriber):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((self.listenhost, self.listenport))
             s.listen()
-            print(f"Server listening on {self.host}:{self.port}")
+            print(f"Server listening on {self.listenhost}:{self.listenport}")
 
             while True:
                 conn, addr = s.accept()
