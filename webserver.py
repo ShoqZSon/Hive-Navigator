@@ -114,7 +114,7 @@ def submit():
     dataToSend = prepData(location, destination)
 
     # send the data to hivemind server
-    sendDataTo(dataToSend,'192.168.56.104',65432)
+    #sendDataTo(dataToSend,'192.168.56.104',65432)
 
     return redirect(url_for('success'))
 
