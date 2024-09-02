@@ -28,7 +28,8 @@ class Hivemind(Publisher,Subscriber):
         self.listenhost = '192.168.56.104'
         self.listenport = 65432
 
-    def listenToConn(self):
+    # TODO: listenHost and listenPort need to be changed to use its own host-only adapter ip address
+    def listen_to_conn(self):
         """This method starts listening towards the webserver (flask app) for incoming customer tasks and fills a queue with those tasks.
         This method never stops running on purpose.
         Its whole purpose is to fill the task queue.
@@ -73,11 +74,12 @@ class Hivemind(Publisher,Subscriber):
         print(f" [x] Received location data: {location_data}")
 
         # Process location data here
-        self.compare_task_and_bot(self.taskQueue[0], location_data)
+        print("Processing data...")
+        #self.compare_task_and_bot(self.taskQueue[0], location_data)
 
     def start_listening_for_locations(self):
         """Start listening for location data from bots."""
-        print("Test: start_listening_for_locations")
+        print("start_listening_for_locations")
         self.connect()
         self.start_consuming(callback=self.location_callback)
 
