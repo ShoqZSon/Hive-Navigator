@@ -114,7 +114,7 @@ def submit():
     dataToSend = prepData(location, destination)
 
     # send the data to hivemind server
-    #sendDataTo(dataToSend,'192.168.56.104',65432)
+    sendDataTo(dataToSend,'192.168.56.104',65432)
 
     return redirect(url_for('success'))
 
@@ -128,4 +128,4 @@ def success():
     return render_template('followBot.html')
 
 if __name__ == '__main__':
-    app.run('192.168.56.102',57920,debug=True)
+    app.run('192.168.56.108',57920,debug=True)
