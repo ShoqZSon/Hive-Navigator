@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 import json
 import socket
+import sys
+from publisher import Publisher
 
 
 app = Flask(__name__)
@@ -50,32 +52,12 @@ def prepData(location:str, destination:str) -> str:
 
     return message
 
-def sendDataTo(message, host:str, port:int) -> None:
-    """Sends the data towards the host and port
+def sendDataToRabbitMQ(message, host:str, port:int) -> None:
+    pub = Publisher(host=host, port=port,routing_key='rawTaskQueue')
+    pub.connect()
+    pub.publish(message,'rawTaskQueue')
+    pub.close()
 
-    Arguments
-    ---------
-    :param host: str
-            host address of the hivemind
-    :param port: int
-            port of the hivemind
-
-    :param message: json object
-    :returns -
-    """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((host, port))
-
-        # Send the JSON string to the server
-        s.sendall(message.encode())
-
-        # Receive response from the server
-        response = s.recv(1024)
-        print(f"Received {response.decode()} from server")
-
-        if response.decode() == "success":
-            print("Data sent successfully")
-            print("Closing connection.")
 
 @app.route('/')
 def main_page():
@@ -113,8 +95,8 @@ def submit():
     # prepares the data for sending
     dataToSend = prepData(location, destination)
 
-    # send the data to hivemind server
-    sendDataTo(dataToSend,'192.168.56.104',65432)
+    # send the data to rabbitMQ
+    sendDataToRabbitMQ(dataToSend,'192.168.56.106',5672)
 
     return redirect(url_for('success'))
 
@@ -128,4 +110,11 @@ def success():
     return render_template('followBot.html')
 
 if __name__ == '__main__':
-    app.run('192.168.56.108',57920,debug=True)
+    # webserverHost = sys.argv[1]
+    # webserverPort = int(sys.argv[2])
+
+    # if not webserverHost or not webserverPort:
+    #    print(f"{webserverHost}:{webserverPort} is not set")
+    #    exit(-1)
+
+    app.run(host='localhost', port=5000, debug=True)

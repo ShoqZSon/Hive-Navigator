@@ -1,15 +1,40 @@
+from publisher import Publisher
+from subscriber import Subscriber
 from bot_class import Bot
 import threading
+import sys
+import queue
+
+
+task_queue = queue.Queue()
 
 if __name__ == "__main__":
-    bot = Bot('192.168.56.106',5672,0,1)
+    #bot_id = sys.argv[1]
+    #bot_hallNr = int(sys.argv[2])
+    #bot_level = int(sys.argv[3])
+    bot_id = 'bot1'
+    bot_hallNr = 1
+    bot_level = 0
 
-    # Start a thread to listen for tasks
-    listeningToBrokerThread = threading.Thread(target=bot.start_listening_for_tasks)
-    publishCoordinatesThread = threading.Thread(target=bot.publish_coordinates())
+    messageBrokerHost = '192.168.56.106'
+    messageBrokerPort = 5672
 
-    listeningToBrokerThread.start()
-    publishCoordinatesThread.start()
+    bot = Bot(bot_id,bot_hallNr,bot_level)
 
-    listeningToBrokerThread.join()
-    publishCoordinatesThread.join()
+    pub_botCurrLoc = Publisher(messageBrokerHost, messageBrokerPort,exchange='',routing_key=f'currLoc_{bot.getId()}')
+    sub_botCurrLoc = Subscriber(messageBrokerHost, messageBrokerPort,queue=f'tasks_{bot.getId()}')
+
+    pub_botCurrLoc.connect()
+    sub_botCurrLoc.connect()
+
+    sub_botCurrLoc_Thread = threading.Thread(target=sub_botCurrLoc.start_consuming, args=(bot.addTask,))
+    botExecuteTask_Thread = threading.Thread(target=bot.executeTask)
+    pub_botCurrLoc_Thread = threading.Thread(target=pub_botCurrLoc.publish,args=(bot.getPackedData,f'currLoc_{bot.getId()}'))
+
+    sub_botCurrLoc_Thread.start()
+    pub_botCurrLoc_Thread.start()
+
+    sub_botCurrLoc_Thread.join()
+    pub_botCurrLoc_Thread.join()
+
+    sub_botCurrLoc.close()

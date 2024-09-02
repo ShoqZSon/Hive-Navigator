@@ -1,47 +1,52 @@
-from publisher import Publisher
-from subscriber import Subscriber
 import json
+import queue
 import time
 
-class Bot(Publisher, Subscriber):
-    def __init__(self, messageBrokerHost, messageBrokerPort, level=0, hall=0):
-        Publisher.__init__(self, host=messageBrokerHost, port=messageBrokerPort, routing_key='currLoc')
-        Subscriber.__init__(self, host=messageBrokerHost, port=messageBrokerPort, queue='taskQueue')
-
-        self.hall = hall
+class Bot:
+    def __init__(self,id=0,level=0, hallNr=0):
+        self.id = id
+        self.hallNr = hallNr
         self.level = level
-        self.ownCoordinates = {'x': 0, 'y': 0}
+        self.Coordinates = {'x': 0, 'y': 0}
+        self.taskQueue = queue.Queue()
 
-    def packData(self):
+    def getPackedData(self):
         """Pack the bot's coordinates into a JSON string."""
         data = {
-            'hall': self.hall,
+            'id': self.id,
+            'hall': self.hallNr,
             'level': self.level,
-            'x': self.ownCoordinates['x'],
-            'y': self.ownCoordinates['y']
+            'x': self.Coordinates['x'],
+            'y': self.Coordinates['y']
         }
         return json.dumps(data)
 
-    def publish_coordinates(self):
-        """Publish the bot's coordinates to the messageBroker."""
-        self.connect()
-        message = self.packData()
-        self.publish(message)
-        self.close()
+    def executeTask(self):
+        if self.taskQueue.empty():
+            print("Task queue is empty")
+        else:
+            task = self.taskQueue.get()
+            print(f"Executing task {task}")
+            for i in range(5):
+                print(f"x: {self.Coordinates['x'] + i}")
+                print(f"y: {self.Coordinates['y'] + i * 2}")
+            self.taskQueue.task_done()
 
-    def task_callback(self, ch, method, properties, body):
-        """Handle tasks received from the messageBroker."""
-        task = json.loads(body)
-        print(f" [x] Received task: {task}")
-        # Process the task here
-        for i in range(3):
-            self.drive()
-            time.sleep(0.5)
+    def addTask(self,task):
+        self.taskQueue.put(task)
+        print(f"Added task: {task} to taskQueue of bot {self.id}")
 
-    def start_listening_for_tasks(self):
-        """Start listening for tasks from the hivemind."""
-        self.connect()
-        self.start_consuming(callback=self.task_callback)
+    def getId(self):
+        return self.id
 
-    def drive(self):
-        print("Driving...")
+    def getHallNr(self):
+        return self.hallNr
+
+    def getLevel(self):
+        return self.level
+
+    def getCoordinates(self):
+        return self.Coordinates
+
+    def getTaskQueue(self):
+        return self.taskQueue

@@ -7,6 +7,7 @@ class Publisher:
         self.port = port
         self.exchange = exchange
         self.routing_key = routing_key
+        # holds the connection object (rabbitmq object)
         self.connection = None
         self.channel = None
 
@@ -16,14 +17,20 @@ class Publisher:
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, port=self.port,credentials=credentials))
         self.channel = self.connection.channel()
 
-    def publish(self, message):
+    def publish(self, message,queue):
         """Publish a message to the specified queue."""
         if self.channel is None:
             raise Exception("Publisher is not connected.")
 
-        self.channel.queue_declare(queue=self.routing_key)
+        # ensures the queue exists before use.
+        self.channel.queue_declare(queue=queue)
+
+        # Method: publish a message to RabbitMQ
+        # exchange: Specifies the name of the exchange to which the message will be published.
+        # routing_key: Determines the routing of the message within the exchange.
+        # body: Specifies the content of the message being sent.
         self.channel.basic_publish(exchange=self.exchange,
-                                   routing_key=self.routing_key,
+                                   routing_key=queue,
                                    body=message)
         print(f" [x] Sent {message}")
 
