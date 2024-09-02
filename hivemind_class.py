@@ -77,6 +77,7 @@ class Hivemind(Publisher,Subscriber):
 
     def start_listening_for_locations(self):
         """Start listening for location data from bots."""
+        print("Test: start_listening_for_locations")
         self.connect()
         self.start_consuming(callback=self.location_callback)
 
