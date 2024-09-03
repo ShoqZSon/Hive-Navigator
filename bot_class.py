@@ -1,6 +1,7 @@
 import json
 import queue
 import time
+import threading
 
 class Bot:
     def __init__(self,id=0,level=0, hallNr=0):
@@ -9,8 +10,9 @@ class Bot:
         self.level = level
         self.Coordinates = {'x': 0, 'y': 0}
         self.taskQueue = queue.Queue()
+        self.publish_event = threading.Event()
 
-    def getPackedData(self):
+    def getBotData(self):
         """Pack the bot's coordinates into a JSON string."""
         data = {
             'id': self.id,
@@ -21,16 +23,24 @@ class Bot:
         }
         return json.dumps(data)
 
+    def publish_botData(self, publisher, botQueue):
+        while True:
+            self.publish_event.wait()
+            publisher.publish(self.getBotData(),botQueue)
+            self.publish_event.clear()
+            time.sleep(5)
+
     def executeTask(self):
-        if self.taskQueue.empty():
-            print("Task queue is empty")
-        else:
-            task = self.taskQueue.get()
-            print(f"Executing task {task}")
-            for i in range(5):
-                print(f"x: {self.Coordinates['x'] + i}")
-                print(f"y: {self.Coordinates['y'] + i * 2}")
-            self.taskQueue.task_done()
+        while True:
+            if not self.taskQueue.empty():
+                task = self.taskQueue.get()
+                print(f"Executing task {task}")
+                for i in range(5):
+                    print(f"x: {self.Coordinates['x'] + i}")
+                    print(f"y: {self.Coordinates['y'] + i * 2}")
+                self.taskQueue.task_done()
+                self.publish_event.set()
+            time.sleep(5)
 
     def addTask(self,task):
         self.taskQueue.put(task)

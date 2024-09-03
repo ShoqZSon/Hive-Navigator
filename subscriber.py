@@ -23,7 +23,7 @@ class Subscriber:
             raise Exception("Subscriber is not connected.")
 
         # ensures the queue exists before use.
-        self.channel.queue_declare(queue=self.queue)
+        self.channel.queue_declare(queue=self.queue,durable=True)
 
         # Method: is used to set up a consumer on a RabbitMQ queue
         # queue: Specifies the name of the queue from which messages will be consumed.

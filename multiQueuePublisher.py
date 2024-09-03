@@ -1,7 +1,8 @@
 from publisher import Publisher
 
+
 class MultiQueuePublisher(Publisher):
-    def __init__(self, messageBrokerHost, messageBrokerPort, queue_prefix='currLoc_', exchange='topic_logs'):
+    def __init__(self, messageBrokerHost, messageBrokerPort, queue_prefix='currLoc.', exchange='topic_logs'):
         super().__init__(messageBrokerHost, messageBrokerPort, exchange)
         self.queue_prefix = queue_prefix
 

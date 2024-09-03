@@ -10,22 +10,25 @@ class MultiQueueSubscriber(Subscriber):
     def connect(self):
         super().connect()
         self.declareTopicExchange()
+        self.bindQueue()
 
     def declareTopicExchange(self):
         self.channel.exchange_declare(exchange=self.exchange,exchange_type='topic')
 
-    def bindQueue(self, suffix):
-        queue = f'{self.queuePrefix}{suffix}'
-        routing_key = f'{self.queuePrefix}{suffix}'
+    def bindQueue(self):
+        print("Looking for any new binds")
+        queue = f'{self.queuePrefix}.*'
+        routing_key = f'{self.queuePrefix}.*'
+        if queue not in self.subscriptions:
+            print(f"Found new bind {queue}")
+            # Declare the queue
+            self.channel.queue_declare(queue=queue, durable=True)
 
-        # Declare the queue
-        self.channel.queue_declare(queue=queue, durable=True)
+            # Bind the queue to the exchange with the routing key
+            self.channel.queue_bind(exchange=self.exchange, queue=queue, routing_key=routing_key)
 
-        # Bind the queue to the exchange with the routing key
-        self.channel.queue_bind(exchange=self.exchange, queue=queue, routing_key=routing_key)
-
-        # Keep track of the queues bound
-        self.subscriptions.append(queue)
+            # Keep track of the queues bound
+            self.subscriptions.append(queue)
 
     def start_consuming(self, callback):
         """Start consuming messages from all bound queues."""

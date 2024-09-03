@@ -23,7 +23,7 @@ class Publisher:
             raise Exception("Publisher is not connected.")
 
         # ensures the queue exists before use.
-        self.channel.queue_declare(queue=queue)
+        self.channel.queue_declare(queue=queue, durable=True)
 
         # Method: publish a message to RabbitMQ
         # exchange: Specifies the name of the exchange to which the message will be published.
@@ -32,7 +32,7 @@ class Publisher:
         self.channel.basic_publish(exchange=self.exchange,
                                    routing_key=queue,
                                    body=message)
-        print(f" [x] Sent {message}")
+        print(f" [x] Sent {message} to {queue}")
 
     def close(self):
         """Close the connection to RabbitMQ."""
