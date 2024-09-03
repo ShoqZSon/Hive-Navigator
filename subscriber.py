@@ -2,7 +2,7 @@ import pika
 
 
 class Subscriber:
-    def __init__(self, host, port, queue='defaultQueue'):
+    def __init__(self, host, port, queue='defaultQueue',exchange='',exchange_type=''):
         self.host = host
         self.port = port
         self.queue = queue

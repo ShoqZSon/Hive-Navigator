@@ -9,9 +9,10 @@ import queue
 task_queue = queue.Queue()
 
 if __name__ == "__main__":
-    bot_id = sys.argv[1]
+    #bot_id = sys.argv[1]
     #bot_hallNr = int(sys.argv[2])
     #bot_level = int(sys.argv[3])
+    bot_id = 'bot1'
     bot_hallNr = 1
     bot_level = 0
 
@@ -26,8 +27,7 @@ if __name__ == "__main__":
     # publisher for the bot data
     pub_bot_curr_loc = Publisher(message_broker_host, message_broker_port,exchange='topic_logs',routing_key=f'currLoc.{bot.getId()}')
     # subscriber to the notifications queue
-    sub_task_notification = Subscriber(message_broker_host, message_broker_port,queue='notification')
-    # subscriber for the bot tasks that listens on his own queue bot.{bot_id}
+    sub_task_notification = Subscriber(message_broker_host, message_broker_port, queue='',exchange='notification_exchange', exchange_type='fanout')    # subscriber for the bot tasks that listens on his own queue bot.{bot_id}
     #sub_bot_tasks = Subscriber(message_broker_host, message_broker_host,queue=f'tasks.{bot.getId()}')
 
 

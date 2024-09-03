@@ -98,8 +98,8 @@ if __name__ == '__main__':
     # listens to the coordinates(x,y), hall-nr, level of any bot that publishes to any queue "currLoc_*"
     sub_bot_curr_loc = MultiQueueSubscriber(message_broker_host, message_broker_port,queue_prefix='currLoc',exchange='topic_logs')
     # publishes a notification on the queue 'notification' to notify subscribers to publish their data
-    pub_task_notification = Publisher(message_broker_host, message_broker_port,exchange='',routing_key='notification')
     # publishes back to the corresponding bots with their respective task
+    pub_task_notification = Publisher(message_broker_host, message_broker_port, exchange='notification_exchange',routing_key='')
     #pub_bot_task = Publisher()
 
 
