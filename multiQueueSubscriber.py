@@ -2,9 +2,9 @@ from subscriber import Subscriber
 
 
 class MultiQueueSubscriber(Subscriber):
-    def __init__(self,messageBrokerHost,messageBrokerPort,queue_prefix='currLoc_',exchange='topic_logs'):
-        super().__init__(messageBrokerHost,messageBrokerPort)
-        self.queuePrefix = queue_prefix
+    def __init__(self,host,port,queue_prefix='currLoc_',exchange='topic_logs'):
+        super().__init__(host,port)
+        self.queue_prefix = queue_prefix
         self.exchange = exchange
 
     def connect(self):
@@ -17,8 +17,8 @@ class MultiQueueSubscriber(Subscriber):
 
     def bindQueue(self):
         print("Looking for any new binds")
-        queue = f'{self.queuePrefix}.*'
-        routing_key = f'{self.queuePrefix}.*'
+        queue = f'{self.queue_prefix}.*'
+        routing_key = f'{self.queue_prefix}.*'
         if queue not in self.subscriptions:
             print(f"Found new bind {queue}")
             # Declare the queue
@@ -30,7 +30,7 @@ class MultiQueueSubscriber(Subscriber):
             # Keep track of the queues bound
             self.subscriptions.append(queue)
 
-    def start_consuming(self, callback):
+    def startConsuming(self, callback):
         """Start consuming messages from all bound queues."""
         if self.channel is None:
             raise Exception("Subscriber is not connected.")

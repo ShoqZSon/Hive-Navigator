@@ -17,7 +17,7 @@ class Subscriber:
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, port=self.port,credentials=credentials))
         self.channel = self.connection.channel()
 
-    def start_consuming(self, callback):
+    def startConsuming(self, callback):
         """Start consuming messages from the queue."""
         if self.channel is None:
             raise Exception("Subscriber is not connected.")

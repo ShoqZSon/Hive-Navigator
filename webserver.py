@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
 import json
-import socket
 import sys
 from publisher import Publisher
 
@@ -9,11 +8,11 @@ app = Flask(__name__)
 
 def extractData(data:str,separator:str) -> str:
     """
-    Extracts the important data from the string commabased.
+    Extracts the important data from the string comma-based.
     :param data: string of comma-separated data.
     :param separator: the separator to separate the string into list entries.
 
-    :return: str
+    :return: str of comma-separated data.
     """
     # TODO: location will need this as well
     tmp = data.split(separator)
@@ -36,10 +35,9 @@ def prepData(location:str, destination:str) -> str:
             data = {
                 "location": str,
                 "destination": str
-
             }
 
-    :return: str
+    :return: str of data
     """
     # Create a dictionary with location and destination
     data = {
@@ -52,11 +50,19 @@ def prepData(location:str, destination:str) -> str:
 
     return message
 
-def sendDataToRabbitMQ(message, host:str, port:int) -> None:
-    pub = Publisher(host=host, port=port,routing_key='rawTaskQueue')
-    pub.connect()
-    pub.publish(message,'rawTaskQueue')
-    pub.close()
+def sendDataToRabbitMQ(message, host:str, port:int, routing_key='rawTaskQueue') -> None:
+    """
+    Sends a message to the message broker RabbitMQ.
+    :param routing_key: The route the message will take to be sent
+    :param message: The data to be sent
+    :param host: The host of the RabbitMQ server
+    :param port: The port of the RabbitMQ server
+    :return: None
+    """
+    pub_webserver_task_queue = Publisher(host=host, port=port,routing_key=routing_key)
+    pub_webserver_task_queue.connect()
+    pub_webserver_task_queue.publish(message,'rawTaskQueue')
+    pub_webserver_task_queue.close()
 
 
 @app.route('/')
