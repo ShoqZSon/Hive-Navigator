@@ -10,20 +10,28 @@ class Subscriber:
         self.connection = None
         self.channel = None
         self.subscriptions = []
+        self.exchange = exchange
+        self.exchange_type = exchange_type
 
     def connect(self):
         """Establish a connection to RabbitMQ."""
         credentials = pika.credentials.PlainCredentials('administrator', 'admin')
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, port=self.port,credentials=credentials))
         self.channel = self.connection.channel()
+        if self.exchange:
+            self.channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type, durable=True)
+
+        # Declare queue
+        self.channel.queue_declare(queue=self.queue, durable=True)
+
+        # Bind queue to exchange if exchange is specified
+        if self.exchange:
+            self.channel.queue_bind(exchange=self.exchange, queue=self.queue)
 
     def startConsuming(self, callback):
         """Start consuming messages from the queue."""
         if self.channel is None:
             raise Exception("Subscriber is not connected.")
-
-        # ensures the queue exists before use.
-        self.channel.queue_declare(queue=self.queue,durable=True)
 
         # Method: is used to set up a consumer on a RabbitMQ queue
         # queue: Specifies the name of the queue from which messages will be consumed.
