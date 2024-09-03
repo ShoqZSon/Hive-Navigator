@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # subscriber to the notifications queue
     sub_task_notification = Subscriber(message_broker_host, message_broker_port,queue='notification')
     # subscriber for the bot tasks that listens on his own queue bot.{bot_id}
-    #sub_bot_tasks = Subscriber(messageBrokerHost, messageBrokerPort,queue=f'tasks.{bot.getId()}')
+    #sub_bot_tasks = Subscriber(message_broker_host, message_broker_host,queue=f'tasks.{bot.getId()}')
 
 
     # ---- Connections to RabbitMQ ---- #
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # ---- Thread Area ---- #
 
     # publishes its data towards the messageBroker (=> towards the hivemind) on his own queue
-    pub_bot_curr_loc_Thread = threading.Thread(target=bot.getBotData,args=(pub_bot_curr_loc,f'currLoc.{bot.getId()}',))
+    pub_bot_curr_loc_Thread = threading.Thread(target=bot.publishBotData,args=(pub_bot_curr_loc,f'currLoc.{bot.getId()}'))
     sub_task_notification_Thread = threading.Thread(target=sub_task_notification.startConsuming,args=(bot.notificationCallback,))
     #sub_bot_tasks_Thread = threading.Thread(target=sub_botCurrLoc.start_consuming, args=(bot.addTask,))
 

@@ -1,3 +1,5 @@
+import sys
+
 from publisher import Publisher
 from subscriber import Subscriber
 from multiQueueSubscriber import MultiQueueSubscriber
@@ -5,11 +7,6 @@ from hivemind_utility import *
 import threading
 import queue
 
-# queue for the tasks received by the webserver
-task_queue = queue.Queue()
-
-# an event-trigger for the
-new_task_Event = threading.Event()
 
 # Callbacks - Subscriber Functions
 def webserver_task_callback(ch, method, properties, body) -> None:
@@ -22,7 +19,7 @@ def webserver_task_callback(ch, method, properties, body) -> None:
     """
     print("webserver_task_callback")
     task = decode_json_object(body)
-    print(f"Received {task}")
+    print(f"Received {task} from {method.routing_key}")
 
     # Enqueue the task for publishing and set the event
     task_queue.put(task)
@@ -30,13 +27,11 @@ def webserver_task_callback(ch, method, properties, body) -> None:
     # sets an event to trigger the publishing of the notification that a new
     new_task_Event.set()
 
-def bot_loc_callback(ch, method, properties, body) -> None:
-    """Used to handle the botCurrLoc.* items
-    """
-    print("bot_loc_callback")
-
+def bot_callback(ch, method, properties, body) -> None:
+    print("bot_callback")
     task = decode_json_object(body)
-    print(f"Received {task}")
+    print(f"Received {task} from {method.routing_key}")
+
 
 # ---- Publisher Functions ---- #
 def publish_task(publisher,bot_curr_loc,bot_queue) -> None:
@@ -47,9 +42,6 @@ def publish_task(publisher,bot_curr_loc,bot_queue) -> None:
     :return: None
     """
     while True:
-        # waits for a new task to be put into the task_queue
-        new_task_Event.wait()
-
         # Wait for a task to be available in the queue
         # removes the task from the queue when available
         task = task_queue.get()
@@ -90,6 +82,12 @@ def notify(publisher,message='newTask',notification_queue='notification') -> Non
     new_task_Event.clear()
 
 if __name__ == '__main__':
+    # queue for the tasks received by the webserver
+    task_queue = queue.Queue()
+
+    # an event-trigger for the
+    new_task_Event = threading.Event()
+
     message_broker_host = '192.168.56.106'
     message_broker_port = 5672
 
@@ -102,7 +100,7 @@ if __name__ == '__main__':
     # publishes a notification on the queue 'notification' to notify subscribers to publish their data
     pub_task_notification = Publisher(message_broker_host, message_broker_port,exchange='',routing_key='notification')
     # publishes back to the corresponding bots with their respective task
-    #pub_botTasks = MultiQueuePublisher(messageBrokerHost, messageBrokerPort,queue_prefix='tasks',exchange='topic_logs')
+    #pub_bot_task = Publisher()
 
 
     # ---- Connections to RabbitMQ ---- #
@@ -120,7 +118,7 @@ if __name__ == '__main__':
     sub_webserverTaskQueue_Thread = threading.Thread(target=sub_webserver_task_queue.startConsuming, args=(webserver_task_callback,))
 
     # subscribe to the current location data from the bots (queue = 'currLoc.*)
-    sub_botCurrLoc_Thread = threading.Thread(target=sub_bot_curr_loc.startConsuming, args=(bot_loc_callback,))
+    sub_botCurrLoc_Thread = threading.Thread(target=sub_bot_curr_loc.startConsuming, args=(bot_callback,))
 
     # publish a notification inside the queue 'notification' to the bots to notify them of new tasks
     # and trigger their publish method which sends their current location data
