@@ -23,12 +23,12 @@ class Bot:
         }
         return json.dumps(data)
 
-    def publishBotData(self, publisher, botQueue):
+    def publishBotData(self, publisher):
         while True:
             self.publish_event.wait()
 
             botData = self.getBotData()
-            publisher.publish(botData,botQueue)
+            publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
             time.sleep(5)
 
             self.publish_event.clear()

@@ -50,18 +50,18 @@ def prepData(location:str, destination:str) -> str:
 
     return message
 
-def sendDataToRabbitMQ(message, host:str, port:int, routing_key='rawTaskQueue') -> None:
+def sendDataToRabbitMQ(message, host:str, port:int,queue='rawTaskQueue') -> None:
     """
     Sends a message to the message broker RabbitMQ.
-    :param routing_key: The route the message will take to be sent
     :param message: The data to be sent
     :param host: The host of the RabbitMQ server
     :param port: The port of the RabbitMQ server
+    :param queue: The queue to send messages to (defaults to 'rawTaskQueue')
     :return: None
     """
-    pub_webserver_task_queue = Publisher(host=host, port=port,routing_key=routing_key)
+    pub_webserver_task_queue = Publisher(host=host, port=port)
     pub_webserver_task_queue.connect()
-    pub_webserver_task_queue.publish(message)
+    pub_webserver_task_queue.publish_to_queue(message,queue=queue)
     pub_webserver_task_queue.close()
 
 
@@ -102,7 +102,7 @@ def submit():
     dataToSend = prepData(location, destination)
 
     # send the data to rabbitMQ
-    sendDataToRabbitMQ(dataToSend,'192.168.56.106',5672)
+    sendDataToRabbitMQ(dataToSend,'192.168.56.106',5672,'rawTaskQueue')
 
     return redirect(url_for('success'))
 
