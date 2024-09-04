@@ -42,6 +42,7 @@ class Bot:
 
             else:
                 print("Time has not elapsed yet")
+                self.publishBotData(publisher, cooldown_seconds=10)
             time.sleep(1)
 
             self.publish_event.clear()
