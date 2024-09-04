@@ -9,7 +9,7 @@ import queue
 
 
 # Callbacks - Subscriber Functions
-def webserver_task_callback(ch, method, properties, body) -> None:
+def from_webserver_task_callback(ch, method, properties, body) -> None:
     """Used to handle the rawTaskQueue items
 
     Receives the raw task (jsonObject), decodes that with decode_json_object(body) into its correct dictionary form.
@@ -28,7 +28,7 @@ def webserver_task_callback(ch, method, properties, body) -> None:
     # sets an event to trigger the publishing of the notification that a new
     new_task_Event.set()
 
-def bot_callback(ch, method, properties, body) -> None:
+def from_bot_callback(ch, method, properties, body) -> None:
     print("bot_callback")
     task = decode_json_object(body)
     print(f"Received {task} from {method.routing_key}")
@@ -124,10 +124,10 @@ if __name__ == '__main__':
     # ---- Thread Area ---- #
 
     # subscribe to the tasks send from the webserver (queue = 'rawTasksQueue')
-    sub_webserver_task_queue_Thread = threading.Thread(target=sub_webserver_task_queue.subscribe_to_queue, args=(webserver_task_callback,'rawTaskQueue'))
+    sub_webserver_task_queue_Thread = threading.Thread(target=sub_webserver_task_queue.subscribe_to_queue, args=(from_webserver_task_callback,'rawTaskQueue'))
 
     # subscribe to the current location data from the bots (queue = 'currLoc.*)
-    sub_botCurrLoc_Thread = threading.Thread(target=sub_bot_curr_loc.subscribe_to_topic, args=(bot_callback,'bot_locs_topic','bot_locs','currLoc.*'))
+    sub_botCurrLoc_Thread = threading.Thread(target=sub_bot_curr_loc.subscribe_to_topic, args=(from_bot_callback,'bot_locs_topic','bot_locs','currLoc.*'))
 
     # publish a notification inside the queue 'notification' to the bots to notify them of new tasks
     # and trigger their publish method which sends their current location data
@@ -135,6 +135,9 @@ if __name__ == '__main__':
 
     # publishes the tasks for specific bots on their respective queue (pattern = currLoc.*; * -> bot1,bot2,...)
     #pub_botTasks_Thread = threading.Thread(target=publish_task, args=(pub_botTasks,sub_botCurrLoc,'currLoc.'))
+
+    # publishes the coordinates of the chosen bot back to the webserver/client periodically
+    # ...put here...
 
     # starts the threads
     sub_webserver_task_queue_Thread.start()

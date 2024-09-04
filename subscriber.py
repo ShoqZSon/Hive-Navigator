@@ -4,7 +4,7 @@ import time
 
 
 class Subscriber:
-    def __init__(self, host, port):
+    def __init__(self, host:str, port:int):
         self.host = host
         self.port = port
         self.connection = None
@@ -78,6 +78,7 @@ class Subscriber:
 
     def close(self) -> None:
         """Close the connection to RabbitMQ."""
+        print("killing connection")
         if self.connection:
             self.connection.close()
 
