@@ -36,6 +36,10 @@ class Bot:
                 print("Time elapsed continue to publish bot data")
                 botData = self.getBotData()
                 publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
+
+                # Update the last published time
+                self.last_published_time = current_time
+
             else:
                 print("Time has not elapsed yet")
             time.sleep(1)
