@@ -42,7 +42,7 @@ if __name__ == "__main__":
     sub_bot_tasks.connect()
 
     pub_one_time_notification.publish_to_queue(bot.getId(),'initial_existence_share')
-    pub_one_time_notification.close()
+    pub_one_time_notification.disconnect()
 
 
     # ---- Thread Area ---- #
