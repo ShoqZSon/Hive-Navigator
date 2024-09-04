@@ -24,7 +24,7 @@ class Bot:
         }
         return json.dumps(data)
 
-    def publishBotData(self, publisher, cooldown_seconds=5):
+    def publishBotData(self, publisher, cooldown_seconds=10):
         while True:
             self.publish_event.wait()
 
@@ -33,6 +33,7 @@ class Bot:
             time_elapsed = current_time - self.last_published_time
 
             if time_elapsed >= cooldown_seconds:
+                print("Time elapsed continue to publish bot data")
                 botData = self.getBotData()
                 publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
 
@@ -52,6 +53,7 @@ class Bot:
                 time.sleep(5)
 
     def notificationCallback(self, ch, method, properties, body):
+        print(f'{body}')
         if body.decode() == 'newTask':
             self.publish_event.set()
 
