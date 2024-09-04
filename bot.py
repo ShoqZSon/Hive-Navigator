@@ -9,10 +9,10 @@ import queue
 task_queue = queue.Queue()
 
 if __name__ == "__main__":
-    bot_id = sys.argv[1]
+    #bot_id = sys.argv[1]
     #bot_hallNr = int(sys.argv[2])
     #bot_level = int(sys.argv[3])
-    #bot_id = 'bot1'
+    bot_id = 'bot2'
     bot_hallNr = 1
     bot_level = 0
 
@@ -42,8 +42,9 @@ if __name__ == "__main__":
 
     # ---- Thread Area ---- #
 
-    # publishes its data towards the messageBroker (=> towards the hivemind) on his own queue
+    # publishes the bot data towards the hivemind for processing waits until a notification from the hivemind gets sent
     pub_bot_curr_loc_Thread = threading.Thread(target=bot.publishBotData,args=(pub_bot_curr_loc,))
+    # subscribes the notification queue in order to let the bot know when to publish its data
     sub_task_notification_Thread = threading.Thread(target=sub_task_notification.subscribe_to_topic,args=(bot.notificationCallback,'notification_topic',f'notifications_{bot.getId()}','notification.*'))
     sub_bot_tasks_Thread = threading.Thread(target=sub_bot_tasks.subscribe_to_queue, args=(bot.addTask,f'tasks.{bot.getId()}'))
 
