@@ -2,9 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for
 import json
 import sys
 from publisher import Publisher
+from subscriber import Subscriber
 
 
 app = Flask(__name__)
+
+def showBotCoordinates(ch,method,properties,body):
+    print(f'{body}')
 
 def extractData(data:str,separator:str) -> str:
     """
@@ -64,6 +68,20 @@ def sendDataToRabbitMQ(message, host:str, port:int,queue='rawTaskQueue') -> None
     pub_webserver_task_queue.publish_to_queue(message,queue=queue)
     pub_webserver_task_queue.close()
 
+def receiveBotData(host:str, port:int,queue='botTaskQueue'):
+    """
+    Receives the bot data (coordinates) periodically to display on a map on the page followBot.html.
+
+    :param host:
+    :param port:
+    :param queue:
+
+    :return: None
+    """
+    sub_bot_data = Subscriber(host=host, port=port)
+    sub_bot_data.connect()
+    sub_bot_data.subscribe_to_queue(callback=showBotCoordinates, queue=queue)
+    sub_bot_data.close()
 
 @app.route('/')
 def main_page():
@@ -112,7 +130,7 @@ def success():
     It then proceeds to show the customer a map and an ETA of the robot towards their location
     """
     # TODO: Success page is supposed to show the current position of the bot + ETA
-
+    receiveBotData('192.168.56.106',5672,'botTaskQueue')
     return render_template('followBot.html')
 
 if __name__ == '__main__':

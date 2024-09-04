@@ -9,7 +9,6 @@ class Subscriber:
         self.port = port
         self.connection = None
         self.channel = None
-        self.subscriptions = []
 
     def connect(self) -> None:
         """Establish a connection to RabbitMQ."""
@@ -78,9 +77,6 @@ class Subscriber:
 
     def close(self) -> None:
         """Close the connection to RabbitMQ."""
-        print("killing connection")
+        print(f"killing connection {self.connection}")
         if self.connection:
             self.connection.close()
-
-    def getSubscriptions(self) -> list:
-        return self.subscriptions

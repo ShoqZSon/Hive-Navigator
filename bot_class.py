@@ -11,6 +11,7 @@ class Bot:
         self.Coordinates = {'x': 0, 'y': 0}
         self.taskQueue = queue.Queue()
         self.publish_event = threading.Event()
+        self.last_published_time = 0
 
     def getBotData(self):
         """Pack the bot's coordinates into a JSON string."""
@@ -23,13 +24,19 @@ class Bot:
         }
         return json.dumps(data)
 
-    def publishBotData(self, publisher):
+    def publishBotData(self, publisher, cooldown_seconds=5):
         while True:
             self.publish_event.wait()
 
-            botData = self.getBotData()
-            publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
-            time.sleep(5)
+            current_time = time.time()
+
+            time_elapsed = current_time - self.last_published_time
+
+            if time_elapsed >= cooldown_seconds:
+                botData = self.getBotData()
+                publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
+
+            time.sleep(1)
 
             self.publish_event.clear()
 

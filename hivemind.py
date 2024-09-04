@@ -30,8 +30,9 @@ def from_webserver_task_callback(ch, method, properties, body) -> None:
 
 def from_bot_callback(ch, method, properties, body) -> None:
     print("bot_callback")
-    task = decode_json_object(body)
-    print(f"Received {task} from {method.routing_key}")
+    bot_data = decode_json_object(body)
+    print(f"Received {bot_data} from {method.routing_key}")
+    bot_loc_queue.put(bot_data)
 
 
 # ---- Publisher Functions ---- #
@@ -89,8 +90,16 @@ def notify(publisher:Publisher,message='') -> None:
             new_task_Event.clear()
 
 if __name__ == '__main__':
+    #bot_num = sys.argv[1]
+
+    task_queue_sem = threading.Semaphore()
+    bot_loc_queue_sem = threading.Semaphore()
+
+
     # queue for the tasks received by the webserver
     task_queue = queue.Queue()
+
+    bot_loc_queue = queue.Queue()
 
     # an event-trigger for the
     new_task_Event = threading.Event()
@@ -133,7 +142,7 @@ if __name__ == '__main__':
     # and trigger their publish method which sends their current location data
     pub_task_notification_Thread = threading.Thread(target=notify,args=(pub_task_notification,'newTask'))
 
-    # publishes the tasks for specific bots on their respective queue (pattern = currLoc.*; * -> bot1,bot2,...)
+    # publishes the tasks for specific bots on their respective queue
     #pub_botTasks_Thread = threading.Thread(target=publish_task, args=(pub_botTasks,sub_botCurrLoc,'currLoc.'))
 
     # publishes the coordinates of the chosen bot back to the webserver/client periodically
