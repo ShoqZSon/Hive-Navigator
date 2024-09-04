@@ -36,7 +36,8 @@ class Bot:
                 print("Time elapsed continue to publish bot data")
                 botData = self.getBotData()
                 publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
-
+            else:
+                print("Time has not elapsed yet")
             time.sleep(1)
 
             self.publish_event.clear()
@@ -53,9 +54,7 @@ class Bot:
                 time.sleep(5)
 
     def notificationCallback(self, ch, method, properties, body):
-        print(f'{body}')
-        if body.decode() == 'newTask':
-            self.publish_event.set()
+        self.publish_event.set()
 
     def addTask(self,task):
         self.taskQueue.put(task)
