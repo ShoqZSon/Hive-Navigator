@@ -5,20 +5,20 @@ import time
 
 class Publisher:
     def __init__(self, host, port):
-        self.host = host
-        self.port = port
-        self.connection = None
-        self.channel = None
+        self.__host = host
+        self.__port = port
+        self.__connection = None
+        self.__channel = None
 
     def connect(self) -> None:
         """Establish a connection to RabbitMQ."""
         while True:
             try:
                 credentials = pika.credentials.PlainCredentials('administrator', 'admin')
-                self.connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=self.host, port=self.port,credentials=credentials)
+                self.__connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(host=self.__host, port=self.__port,credentials=credentials)
                 )
-                self.channel = self.connection.channel()
+                self.__channel = self.__connection.channel()
                 break
             except pika.exceptions.AMQPConnectionError as e:
                 print(f"Connection failed: {e}. Retrying in 5 seconds...")
@@ -27,13 +27,13 @@ class Publisher:
     def publish_to_queue(self, message, queue:str) -> None:
         """Publish a message to the specified queue."""
         try:
-            if self.channel is None:
+            if self.__channel is None:
                 raise Exception("Publisher is not connected.")
 
             # ensures the queue exists before use.
-            self.channel.queue_declare(queue=queue, durable=True)
+            self.__channel.queue_declare(queue=queue, durable=True)
 
-            self.channel.basic_publish(exchange='',
+            self.__channel.basic_publish(exchange='',
                                        routing_key=queue,
                                        body=message)
 
@@ -48,15 +48,15 @@ class Publisher:
     def publish_to_topic(self, message, exchange:str, routing_key:str) -> None :
         """Publish a message to all queues bound to a fanout exchange."""
         try:
-            if self.channel is None:
+            if self.__channel is None:
                 raise Exception("Publisher is not connected.")
 
             # Declare a fanout exchange. This exchange will broadcast messages to all bound queues.
-            self.channel.exchange_declare(exchange=exchange, exchange_type='topic')
+            self.__channel.exchange_declare(exchange=exchange, exchange_type='topic')
 
             # Publish the message to the fanout exchange.
             # Since it's a fanout exchange, the routing key is ignored.
-            self.channel.basic_publish(
+            self.__channel.basic_publish(
                 exchange=exchange,
                 routing_key=routing_key,
                 body=message
@@ -70,8 +70,8 @@ class Publisher:
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
 
-    def close(self) -> None:
+    def disconnect(self) -> None:
         """Close the connection to RabbitMQ."""
-        if self.connection:
-            self.connection.close()
-            print("RabbitMQ connection is closed.")
+        if self.__connection:
+            self.__connection.close()
+            print(f'Connection: {self.__connection} has been disconnected.')

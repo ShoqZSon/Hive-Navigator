@@ -5,20 +5,20 @@ import time
 
 class Subscriber:
     def __init__(self, host:str, port:int):
-        self.host = host
-        self.port = port
-        self.connection = None
-        self.channel = None
+        self.__host = host
+        self.__port = port
+        self.__connection = None
+        self.__channel = None
 
     def connect(self) -> None:
         """Establish a connection to RabbitMQ."""
         while True:
             try:
                 credentials = pika.credentials.PlainCredentials('administrator', 'admin')
-                self.connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=self.host, port=self.port, credentials=credentials)
+                self.__connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(host=self.__host, port=self.__port, credentials=credentials)
                 )
-                self.channel = self.connection.channel()
+                self.__channel = self.__connection.channel()
                 break
             except pika.exceptions.AMQPConnectionError as e:
                 print(f"Connection failed: {e}. Retrying in 5 seconds...")
@@ -26,19 +26,19 @@ class Subscriber:
 
     def subscribe_to_queue(self,callback,queue:str) -> None:
         """Start consuming messages from a specific queue."""
-        if self.channel is None:
+        if self.__channel is None:
             raise Exception("Subscriber is not connected.")
 
         # ensures the queue exists before use.
-        self.channel.queue_declare(queue=queue,durable=True)
+        self.__channel.queue_declare(queue=queue,durable=True)
 
-        self.channel.basic_consume(queue=queue,
+        self.__channel.basic_consume(queue=queue,
                                    on_message_callback=callback,
                                    auto_ack=True)
 
         print(f" [*] Waiting for messages in [{queue}]")
 
-        self.channel.start_consuming()
+        self.__channel.start_consuming()
 
     def subscribe_to_topic(self, callback, exchange:str, queue:str, routing_key:str) -> None:
         """
@@ -51,21 +51,21 @@ class Subscriber:
 
         :return None
         """
-        if self.channel is None:
+        if self.__channel is None:
             raise Exception("Subscriber is not connected.")
 
         # Declare the topic exchange (must match the one used by the publisher).
-        self.channel.exchange_declare(exchange=exchange, exchange_type='topic')
+        self.__channel.exchange_declare(exchange=exchange, exchange_type='topic')
 
         # Declare a queue (it can be the same queue for multiple routing keys)
-        self.channel.queue_declare(queue=queue, durable=True)
+        self.__channel.queue_declare(queue=queue, durable=True)
 
         # Bind the queue to the topic exchange with the specified routing key pattern.
-        self.channel.queue_bind(exchange=exchange, queue=queue, routing_key=routing_key)
+        self.__channel.queue_bind(exchange=exchange, queue=queue, routing_key=routing_key)
 
         print(f" [*] Queue [{queue}] is now bound to the topic exchange [{exchange}] with prefix [{routing_key}]")
 
-        self.channel.basic_consume(
+        self.__channel.basic_consume(
             queue=queue,
             on_message_callback=callback,
             auto_ack=True
@@ -73,10 +73,11 @@ class Subscriber:
 
         print(f" [*] Waiting for messages in topic exchange [{exchange}] with prefix {routing_key}")
 
-        self.channel.start_consuming()
+        self.__channel.start_consuming()
 
-    def close(self) -> None:
+    def disconnect(self) -> None:
         """Close the connection to RabbitMQ."""
-        print(f"killing connection {self.connection}")
-        if self.connection:
-            self.connection.close()
+        if self.__connection:
+            self.__connection.close()
+            print(f'Connection: {self.__connection} has been disconnected.')
+

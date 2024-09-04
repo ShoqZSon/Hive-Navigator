@@ -21,8 +21,9 @@ if __name__ == "__main__":
 
     bot = Bot(bot_id,bot_hallNr,bot_level)
 
-
     # ---- Publisher & Subscriber Initialization ---- #
+
+    pub_one_time_notification = Publisher(message_broker_host,message_broker_port)
 
     # publisher for the bot data
     pub_bot_curr_loc = Publisher(message_broker_host, message_broker_port)
@@ -35,9 +36,13 @@ if __name__ == "__main__":
     # ---- Connections to RabbitMQ ---- #
 
     # establishes the connection with the messageBroker
+    pub_one_time_notification.connect()
     pub_bot_curr_loc.connect()
     sub_task_notification.connect()
     sub_bot_tasks.connect()
+
+    pub_one_time_notification.publish_to_queue(bot.getId(),'initial_existence_share')
+    pub_one_time_notification.close()
 
 
     # ---- Thread Area ---- #
@@ -62,6 +67,6 @@ if __name__ == "__main__":
     # ---- Closing the RabbitMQ connections ---- #
 
     # closes the connection to RabbitMQ
-    pub_bot_curr_loc.close()
-    sub_task_notification.close()
-    sub_bot_tasks.close()
+    pub_bot_curr_loc.disconnect()
+    sub_task_notification.disconnect()
+    sub_bot_tasks.disconnect()
