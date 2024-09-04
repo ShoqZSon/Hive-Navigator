@@ -1,5 +1,6 @@
 import sys
 
+import pika.exceptions
 from publisher import Publisher
 from subscriber import Subscriber
 from hivemind_utility import *
@@ -76,10 +77,16 @@ def notify(publisher:Publisher,message='') -> None:
     """
     while True:
         new_task_Event.wait()
-        print("notify queue")
-        publisher.publish_to_topic(message=message,exchange='notification_topic',routing_key='notification.info')
-
-        new_task_Event.clear()
+        try:
+            print("notify queue")
+            publisher.publish_to_topic(message=message,exchange='notification_topic',routing_key='notification.info')
+        except (pika.exceptions.StreamLostError, pika.exceptions.AMQPChannelError) as e:
+            print(f"Error during notification publishing: {e}. Reconnecting...")
+            publisher.connect()  # Reconnect
+        except Exception as e:
+            print(f"Unexpected error during notification: {e}")
+        finally:
+            new_task_Event.clear()
 
 if __name__ == '__main__':
     # queue for the tasks received by the webserver

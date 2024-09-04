@@ -1,4 +1,6 @@
 import pika
+import pika.exceptions
+import time
 
 
 class Subscriber:
@@ -11,9 +13,17 @@ class Subscriber:
 
     def connect(self):
         """Establish a connection to RabbitMQ."""
-        credentials = pika.credentials.PlainCredentials('administrator', 'admin')
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, port=self.port,credentials=credentials))
-        self.channel = self.connection.channel()
+        while True:
+            try:
+                credentials = pika.credentials.PlainCredentials('administrator', 'admin')
+                self.connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(host=self.host, port=self.port, credentials=credentials)
+                )
+                self.channel = self.connection.channel()
+                break
+            except pika.exceptions.AMQPConnectionError as e:
+                print(f"Connection failed: {e}. Retrying in 5 seconds...")
+                time.sleep(5)
 
     def subscribe_to_queue(self,callback,queue):
         """Start consuming messages from a specific queue."""
