@@ -9,10 +9,10 @@ import queue
 task_queue = queue.Queue()
 
 if __name__ == "__main__":
-    #bot_id = sys.argv[1]
+    bot_id = sys.argv[1]
     #bot_hallNr = int(sys.argv[2])
     #bot_level = int(sys.argv[3])
-    bot_id = 'bot1'
+    #bot_id = 'bot1'
     bot_hallNr = 1
     bot_level = 0
 
