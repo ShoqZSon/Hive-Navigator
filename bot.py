@@ -1,5 +1,6 @@
 from publisher import Publisher
 from subscriber import Subscriber
+from multiQueueSubscriber import MultiQueueSubscriber
 from bot_class import Bot
 import threading
 import sys
@@ -25,9 +26,10 @@ if __name__ == "__main__":
     # ---- Publisher & Subscriber Initialization ---- #
 
     # publisher for the bot data
-    pub_bot_curr_loc = Publisher(message_broker_host, message_broker_port,exchange='topic_logs',routing_key=f'currLoc.{bot.getId()}')
+    pub_bot_curr_loc = MultiQueueSubscriber(message_broker_host, message_broker_port,exchange='currLocExchange',routing_key=f'currLoc.{bot.getId()}')
     # subscriber to the notifications queue
-    sub_task_notification = Subscriber(message_broker_host, message_broker_port, queue='',exchange='notification_exchange', exchange_type='fanout')    # subscriber for the bot tasks that listens on his own queue bot.{bot_id}
+    #sub_task_notification = Subscriber(message_broker_host, message_broker_port,queue='notification')
+    # subscriber for the bot tasks that listens on his own queue bot.{bot_id}
     #sub_bot_tasks = Subscriber(message_broker_host, message_broker_host,queue=f'tasks.{bot.getId()}')
 
 
@@ -35,7 +37,7 @@ if __name__ == "__main__":
 
     # establishes the connection with the messageBroker
     pub_bot_curr_loc.connect()
-    sub_task_notification.connect()
+    #sub_task_notification.connect()
     #sub_bot_tasks.connect()
 
 
@@ -43,17 +45,17 @@ if __name__ == "__main__":
 
     # publishes its data towards the messageBroker (=> towards the hivemind) on his own queue
     pub_bot_curr_loc_Thread = threading.Thread(target=bot.publishBotData,args=(pub_bot_curr_loc,f'currLoc.{bot.getId()}'))
-    sub_task_notification_Thread = threading.Thread(target=sub_task_notification.startConsuming,args=(bot.notificationCallback,))
+    #sub_task_notification_Thread = threading.Thread(target=sub_task_notification.startConsuming,args=(bot.notificationCallback,))
     #sub_bot_tasks_Thread = threading.Thread(target=sub_botCurrLoc.start_consuming, args=(bot.addTask,))
 
     # starts the threads
     pub_bot_curr_loc_Thread.start()
-    sub_task_notification_Thread.start()
+    #sub_task_notification_Thread.start()
     #sub_bot_tasks_Thread.start()
 
     # closes the threads gracefully
     pub_bot_curr_loc_Thread.join()
-    sub_task_notification_Thread.join()
+    #sub_task_notification_Thread.join()
     #sub_botTasks_Thread.join()
 
 
@@ -61,5 +63,5 @@ if __name__ == "__main__":
 
     # closes the connection to RabbitMQ
     pub_bot_curr_loc.close()
-    sub_task_notification.close()
+    #sub_task_notification.close()
     #sub_bot_tasks.close()

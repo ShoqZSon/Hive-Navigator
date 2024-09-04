@@ -2,12 +2,12 @@ import pika
 
 
 class Publisher:
-    def __init__(self, host, port, exchange='', routing_key='defaultQueue'):
+    def __init__(self, host, port, exchange='', routing_key='', queue=''):
         self.host = host
         self.port = port
         self.exchange = exchange
         self.routing_key = routing_key
-        # holds the connection object (rabbitmq object)
+        self.queue = queue
         self.connection = None
         self.channel = None
 
@@ -17,22 +17,18 @@ class Publisher:
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, port=self.port,credentials=credentials))
         self.channel = self.connection.channel()
 
-    def publish(self, message,queue):
+    def publish(self, message):
         """Publish a message to the specified queue."""
         if self.channel is None:
             raise Exception("Publisher is not connected.")
 
         # ensures the queue exists before use.
-        self.channel.queue_declare(queue=queue, durable=True)
+        self.channel.queue_declare(queue=self.queue, durable=True)
 
-        # Method: publish a message to RabbitMQ
-        # exchange: Specifies the name of the exchange to which the message will be published.
-        # routing_key: Determines the routing of the message within the exchange.
-        # body: Specifies the content of the message being sent.
         self.channel.basic_publish(exchange=self.exchange,
-                                   routing_key=queue,
+                                   routing_key=self.queue,
                                    body=message)
-        print(f" [x] Sent {message} to {queue}")
+        print(f" [x] Sent {message} to {self.queue}")
 
     def close(self):
         """Close the connection to RabbitMQ."""

@@ -2,43 +2,35 @@ from subscriber import Subscriber
 
 
 class MultiQueueSubscriber(Subscriber):
-    def __init__(self,host,port,queue_prefix='currLoc_',exchange='topic_logs'):
-        super().__init__(host,port)
-        self.queue_prefix = queue_prefix
+    def __init__(self,host,port,exchange='', routing_key='',queue=''):
+        super().__init__(host,port,queue)
         self.exchange = exchange
+        self.routing_key = routing_key
 
-    def connect(self):
-        super().connect()
-        self.declareTopicExchange()
-        self.bindQueue()
-
-    def declareTopicExchange(self):
-        self.channel.exchange_declare(exchange=self.exchange,exchange_type='topic')
-
-    def bindQueue(self):
-        print("Looking for any new binds")
-        queue = f'{self.queue_prefix}.*'
-        routing_key = f'{self.queue_prefix}.*'
-        if queue not in self.subscriptions:
-            print(f"Found new bind {queue}")
-            # Declare the queue
-            self.channel.queue_declare(queue=queue, durable=True)
-
-            # Bind the queue to the exchange with the routing key
-            self.channel.queue_bind(exchange=self.exchange, queue=queue, routing_key=routing_key)
-
-            # Keep track of the queues bound
-            self.subscriptions.append(queue)
-
-    def startConsuming(self, callback):
-        """Start consuming messages from all bound queues."""
+    def subscribe_to_topic(self,callback):
+        """
+        Bind multiple queues to a topic exchange to receive messages based on the routing key pattern.
+        """
         if self.channel is None:
             raise Exception("Subscriber is not connected.")
 
-        for queue in self.subscriptions:
-            self.channel.basic_consume(queue=queue,
-                                       on_message_callback=callback,
-                                       auto_ack=True)
+        # Declare the topic exchange (must match the one used by the publisher).
+        self.channel.exchange_declare(exchange=self.exchange, exchange_type='topic')
 
-        print(f" [*] Waiting for messages in {', '.join(self.subscriptions)}. To exit press CTRL+C")
+        # Declare a queue (it can be the same queue for multiple routing keys)
+        self.channel.queue_declare(queue=self.queue, durable=True)
+
+        # Bind the queue to the topic exchange with the specified routing key pattern.
+        self.channel.queue_bind(exchange=self.exchange, queue=self.queue, routing_key=self.routing_key)
+
+        print(f" [*] Queue {self.queue} is now bound to the topic exchange {self.exchange} with prefix {self.routing_key}")
+
+        self.channel.basic_consume(
+            queue=self.queue,
+            on_message_callback=callback,
+            auto_ack=True
+        )
+
+    def startConsuming(self, callback):
+        self.subscribe_to_topic(callback)
         self.channel.start_consuming()

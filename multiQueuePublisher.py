@@ -2,18 +2,25 @@ from publisher import Publisher
 
 
 class MultiQueuePublisher(Publisher):
-    def __init__(self, messageBrokerHost, messageBrokerPort, queue_prefix='currLoc.', exchange='topic_logs'):
-        super().__init__(messageBrokerHost, messageBrokerPort, exchange)
-        self.queue_prefix = queue_prefix
+    def __init__(self, messageBrokerHost, messageBrokerPort, exchange='',routing_key='',queue=''):
+        super().__init__(messageBrokerHost, messageBrokerPort, exchange,queue)
+        self.routing_key = routing_key
 
-    def publish_to_all(self, message, suffixes):
-        """Publish messages to all queues with the given suffixes."""
+    def publish(self, message):
+        """
+        Publish a message to all queues bound to a fanout exchange.
+        """
         if self.channel is None:
             raise Exception("Publisher is not connected.")
 
-        for suffix in suffixes:
-            routing_key = f'{self.queue_prefix}{suffix}'
-            self.channel.basic_publish(exchange=self.exchange,
-                                       routing_key=routing_key,
-                                       body=message)
-            print(f" [x] Sent {message} to {routing_key}")
+        # Declare a fanout exchange. This exchange will broadcast messages to all bound queues.
+        self.channel.exchange_declare(exchange=self.exchange, exchange_type='topic')
+
+        # Publish the message to the fanout exchange.
+        # Since it's a fanout exchange, the routing key is ignored.
+        self.channel.basic_publish(
+            exchange=self.exchange,
+            routing_key=self.routing_key,
+            body=message
+        )
+        print(f" [x] Sent {self.routing_key}:{message}")

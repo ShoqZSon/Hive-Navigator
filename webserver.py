@@ -61,7 +61,7 @@ def sendDataToRabbitMQ(message, host:str, port:int, routing_key='rawTaskQueue') 
     """
     pub_webserver_task_queue = Publisher(host=host, port=port,routing_key=routing_key)
     pub_webserver_task_queue.connect()
-    pub_webserver_task_queue.publish(message,'rawTaskQueue')
+    pub_webserver_task_queue.publish(message)
     pub_webserver_task_queue.close()
 
 
