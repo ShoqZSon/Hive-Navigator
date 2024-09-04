@@ -10,7 +10,7 @@ class Publisher:
         self.connection = None
         self.channel = None
 
-    def connect(self):
+    def connect(self) -> None:
         """Establish a connection to RabbitMQ."""
         while True:
             try:
@@ -24,7 +24,7 @@ class Publisher:
                 print(f"Connection failed: {e}. Retrying in 5 seconds...")
                 time.sleep(5)
 
-    def publish_to_queue(self, message, queue):
+    def publish_to_queue(self, message, queue:str) -> None:
         """Publish a message to the specified queue."""
         try:
             if self.channel is None:
@@ -45,7 +45,7 @@ class Publisher:
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
 
-    def publish_to_topic(self, message, exchange, routing_key):
+    def publish_to_topic(self, message, exchange:str, routing_key:str) -> None :
         """Publish a message to all queues bound to a fanout exchange."""
         try:
             if self.channel is None:
@@ -70,7 +70,7 @@ class Publisher:
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
 
-    def close(self):
+    def close(self) -> None:
         """Close the connection to RabbitMQ."""
         if self.connection:
             self.connection.close()

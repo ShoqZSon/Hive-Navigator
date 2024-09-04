@@ -11,7 +11,7 @@ class Subscriber:
         self.channel = None
         self.subscriptions = []
 
-    def connect(self):
+    def connect(self) -> None:
         """Establish a connection to RabbitMQ."""
         while True:
             try:
@@ -25,7 +25,7 @@ class Subscriber:
                 print(f"Connection failed: {e}. Retrying in 5 seconds...")
                 time.sleep(5)
 
-    def subscribe_to_queue(self,callback,queue):
+    def subscribe_to_queue(self,callback,queue:str) -> None:
         """Start consuming messages from a specific queue."""
         if self.channel is None:
             raise Exception("Subscriber is not connected.")
@@ -41,7 +41,7 @@ class Subscriber:
 
         self.channel.start_consuming()
 
-    def subscribe_to_topic(self, callback, exchange, queue, routing_key) -> None:
+    def subscribe_to_topic(self, callback, exchange:str, queue:str, routing_key:str) -> None:
         """
         Bind a queue to a topic exchange to receive messages based on the routing key pattern.
 
@@ -76,10 +76,10 @@ class Subscriber:
 
         self.channel.start_consuming()
 
-    def close(self):
+    def close(self) -> None:
         """Close the connection to RabbitMQ."""
         if self.connection:
             self.connection.close()
 
-    def getSubscriptions(self):
+    def getSubscriptions(self) -> list:
         return self.subscriptions
