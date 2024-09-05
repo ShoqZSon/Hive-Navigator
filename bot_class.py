@@ -48,9 +48,11 @@ class Bot:
     def notificationCallback(self, ch, method, properties, body):
         self.publish_event.set()
 
-    def addTask(self,task):
-        self.taskQueue.put(task)
-        print(f"Added task: {task} to taskQueue of bot {self.id}")
+    def addTask_callback(self,task):
+        while True:
+            if task not in self.taskQueue.queue:
+                self.taskQueue.put(task)
+                print(f"Added task: {task} to taskQueue of bot {self.id}")
 
     def getId(self):
         return self.id

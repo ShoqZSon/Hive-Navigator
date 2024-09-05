@@ -100,8 +100,6 @@ class Subscriber:
             self.__connection.process_data_events()
             time.sleep(1)  # Sleep to avoid busy-waiting
 
-
-
     def disconnect(self) -> None:
         """Close the connection to RabbitMQ."""
         if self.__connection:
