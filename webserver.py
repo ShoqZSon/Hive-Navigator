@@ -66,7 +66,7 @@ def sendDataToRabbitMQ(message, host:str, port:int,queue='rawTaskQueue') -> None
     pub_webserver_task_queue = Publisher(host=host, port=port)
     pub_webserver_task_queue.connect()
     pub_webserver_task_queue.publish_to_queue(message,queue=queue)
-    pub_webserver_task_queue.close()
+    pub_webserver_task_queue.disconnect()
 
 def receiveBotData(host:str, port:int,queue='botTaskQueue'):
     """
@@ -81,7 +81,7 @@ def receiveBotData(host:str, port:int,queue='botTaskQueue'):
     sub_bot_data = Subscriber(host=host, port=port)
     sub_bot_data.connect()
     sub_bot_data.subscribe_to_queue(callback=showBotCoordinates, queue=queue)
-    sub_bot_data.close()
+    sub_bot_data.disconnect()
 
 @app.route('/')
 def main_page():
@@ -130,7 +130,7 @@ def success():
     It then proceeds to show the customer a map and an ETA of the robot towards their location
     """
     # TODO: Success page is supposed to show the current position of the bot + ETA
-    receiveBotData('192.168.56.106',5672,'botTaskQueue')
+    #receiveBotData('192.168.56.106',5672,'botTaskQueue')
     return render_template('followBot.html')
 
 if __name__ == '__main__':
