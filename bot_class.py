@@ -28,6 +28,7 @@ class Bot:
             self.publish_event.wait()
 
             botData = self.getBotData()
+            print("publishing the bot data now")
             publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
 
             time.sleep(1)
@@ -46,7 +47,9 @@ class Bot:
                 time.sleep(5)
 
     def notificationCallback(self, ch, method, properties, body):
+        print(json.dumps(body))
         self.publish_event.set()
+        print("publish_even is set")
 
     def addTask_callback(self,ch, method, properties, body):
         task = json.loads(body)
