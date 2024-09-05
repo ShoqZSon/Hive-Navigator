@@ -96,6 +96,7 @@ def check_queue():
             new_task_event.set()
         time.sleep(1)
 
+# TODO: Implement the comparison algorithm and send the correct task to the bot
 def compare_userLoc_botLoc(usr_data:dict, bot_data:dict):
     """ The algorithm to determine which bot is the best fit for the task.
     Decides by comparing every bot_data x,y coordinate + the hall-nr with the corresponding values in usr_data

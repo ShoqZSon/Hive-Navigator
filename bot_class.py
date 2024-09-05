@@ -49,11 +49,10 @@ class Bot:
         self.publish_event.set()
 
     def addTask_callback(self,ch, method, properties, body):
-        while True:
-            task = json.loads(body)
-            if task not in self.taskQueue.queue:
-                self.taskQueue.put(task)
-                print(f"Added task: {task} to taskQueue of bot {self.id}")
+        task = json.loads(body)
+        if task not in self.taskQueue.queue:
+            self.taskQueue.put(task)
+            print(f"Added task: {task} to taskQueue of bot {self.id}")
 
     def getId(self):
         return self.id
