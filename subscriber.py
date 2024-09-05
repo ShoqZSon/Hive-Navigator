@@ -75,6 +75,33 @@ class Subscriber:
 
         self.__channel.start_consuming()
 
+    def subscribe_to_queue_tmp(self,callback,queue:str, timeout:int):
+        """Start consuming messages from a specific queue."""
+        if self.__channel is None:
+            raise Exception("Subscriber is not connected.")
+
+        # ensures the queue exists before use.
+        self.__channel.queue_declare(queue=queue, durable=False,auto_delete=True)
+
+        self.__channel.basic_consume(queue=queue,
+                                     on_message_callback=callback,
+                                     auto_ack=True)
+
+        print(f" [*] Waiting for messages in [{queue}]")
+
+        start_time = time.time()
+        while True:
+            # Check if the timeout period has elapsed
+            if time.time() - start_time > timeout:
+                print("Timeout reached. Stopping...")
+                break
+
+            # Process incoming messages
+            self.__connection.process_data_events()
+            time.sleep(1)  # Sleep to avoid busy-waiting
+
+
+
     def disconnect(self) -> None:
         """Close the connection to RabbitMQ."""
         if self.__connection:

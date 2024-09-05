@@ -24,14 +24,14 @@ class Publisher:
                 print(f"Connection failed: {e}. Retrying in 5 seconds...")
                 time.sleep(5)
 
-    def publish_to_queue(self, message, queue:str) -> None:
+    def publish_to_queue(self, message, queue:str,auto_delete=False,durable=True) -> None:
         """Publish a message to the specified queue."""
         try:
             if self.__channel is None:
                 raise Exception("Publisher is not connected.")
 
             # ensures the queue exists before use.
-            self.__channel.queue_declare(queue=queue, durable=True)
+            self.__channel.queue_declare(queue=queue, durable=durable,auto_delete=auto_delete)
 
             self.__channel.basic_publish(exchange='',
                                        routing_key=queue,

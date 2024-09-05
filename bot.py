@@ -41,7 +41,7 @@ if __name__ == "__main__":
     sub_task_notification.connect()
     sub_bot_tasks.connect()
 
-    pub_one_time_notification.publish_to_queue(bot.getId(),'initial_existence_share')
+    pub_one_time_notification.publish_to_queue(bot.getId(),'initial_existence_share',auto_delete=True,durable=False)
     pub_one_time_notification.disconnect()
 
 
