@@ -26,10 +26,6 @@ class Publisher:
 
     def publish_to_queue(self, message, queue:str,auto_delete=False,durable=True) -> None:
         """Publish a message to the specified queue."""
-        print(message)
-        print(type(message))
-        print(queue)
-        print(type(queue))
         try:
             if self.__channel is None:
                 raise Exception("Publisher is not connected.")
