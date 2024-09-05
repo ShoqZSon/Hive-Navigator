@@ -26,6 +26,10 @@ class Publisher:
 
     def publish_to_queue(self, message, queue:str,auto_delete=False,durable=True) -> None:
         """Publish a message to the specified queue."""
+        print(message)
+        print(type(message))
+        print(queue)
+        print(type(queue))
         try:
             if self.__channel is None:
                 raise Exception("Publisher is not connected.")
@@ -44,6 +48,7 @@ class Publisher:
             self.publish_to_queue(message, queue)  # Retry publishing
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
+            print(f'publish_to_queue: {message}, {queue}')
 
     def publish_to_topic(self, message, exchange:str, routing_key:str) -> None :
         """Publish a message to all queues bound to a fanout exchange."""
@@ -69,7 +74,7 @@ class Publisher:
             self.publish_to_topic(message, exchange, routing_key)  # Retry publishing
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
-            print(f'{message}, {exchange}, {routing_key}')
+            print(f'publish_to_topic: {message}, {exchange}, {routing_key}')
 
     def disconnect(self) -> None:
         """Close the connection to RabbitMQ."""

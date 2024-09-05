@@ -61,7 +61,7 @@ def publish_task(publisher:Publisher) -> None:
 
         bot_curr_loc = bot_queue_dict
         selected_task,bot_queue = compare_userLoc_botLoc(task,bot_curr_loc)
-        publisher.publish_to_queue(selected_task, queue=bot_queue)
+        publisher.publish_to_queue(message=selected_task, queue=bot_queue)
         print(f"Published task {selected_task}")
 
         task_processing.clear()
@@ -109,9 +109,14 @@ def compare_userLoc_botLoc(usr_data:dict, bot_data:dict):
     print(f"usrLoc: {usr_data}")
     print(f"botLoc: {bot_data}")
 
-    return {'user': usr_data,
+    task = {'user': usr_data,
             'destination': {'destination': 'dest1', 'hallNr': 2, 'floor': 0, 'x': 235, 'y': 134}
-            }, 'tasks.bot1'
+            }
+    task = json.dumps(task)
+
+    myqueue = 'tasks.bot1'
+
+    return task,myqueue
 
 def showQueues():
     while True:
@@ -169,7 +174,7 @@ if __name__ == '__main__':
     pub_bot_task.connect()
 
     # receives an initial notification from every bot that they exist
-    sub_one_time_notification.subscribe_to_queue_tmp(get_all_bots,'initial_existence_share',30)
+    sub_one_time_notification.subscribe_to_queue_tmp(get_all_bots,'initial_existence_share',10)
     sub_one_time_notification.disconnect()
 
     bot_num = len(bot_queue_dict)

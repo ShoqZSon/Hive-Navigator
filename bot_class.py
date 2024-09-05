@@ -48,8 +48,9 @@ class Bot:
     def notificationCallback(self, ch, method, properties, body):
         self.publish_event.set()
 
-    def addTask_callback(self,task):
+    def addTask_callback(self,ch, method, properties, body):
         while True:
+            task = json.loads(body)
             if task not in self.taskQueue.queue:
                 self.taskQueue.put(task)
                 print(f"Added task: {task} to taskQueue of bot {self.id}")
