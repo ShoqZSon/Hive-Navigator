@@ -39,7 +39,7 @@ if __name__ == "__main__":
     pub_one_time_notification.connect()
     pub_bot_curr_loc.connect()
     sub_task_notification.connect()
-    sub_bot_tasks.connect()
+    #sub_bot_tasks.connect()
 
     pub_one_time_notification.publish_to_queue(bot.getId(),'initial_existence_share',auto_delete=True,durable=False)
     pub_one_time_notification.disconnect()
@@ -51,17 +51,17 @@ if __name__ == "__main__":
     pub_bot_curr_loc_Thread = threading.Thread(target=bot.publishBotData,args=(pub_bot_curr_loc,))
     # subscribes the notification queue in order to let the bot know when to publish its data
     sub_task_notification_Thread = threading.Thread(target=sub_task_notification.subscribe_to_topic,args=(bot.notificationCallback,'notification_topic',f'notifications_{bot.getId()}','notification.*'))
-    sub_bot_tasks_Thread = threading.Thread(target=sub_bot_tasks.subscribe_to_queue, args=(bot.addTask_callback,f'tasks.{bot.getId()}'))
+    #sub_bot_tasks_Thread = threading.Thread(target=sub_bot_tasks.subscribe_to_queue, args=(bot.addTask_callback,f'tasks.{bot.getId()}'))
 
     # starts the threads
     pub_bot_curr_loc_Thread.start()
     sub_task_notification_Thread.start()
-    sub_bot_tasks_Thread.start()
+    #sub_bot_tasks_Thread.start()
 
     # closes the threads gracefully
     pub_bot_curr_loc_Thread.join()
     sub_task_notification_Thread.join()
-    sub_bot_tasks_Thread.join()
+    #sub_bot_tasks_Thread.join()
 
 
     # ---- Closing the RabbitMQ connections ---- #
@@ -69,4 +69,4 @@ if __name__ == "__main__":
     # closes the connection to RabbitMQ
     pub_bot_curr_loc.disconnect()
     sub_task_notification.disconnect()
-    sub_bot_tasks.disconnect()
+    #sub_bot_tasks.disconnect()
