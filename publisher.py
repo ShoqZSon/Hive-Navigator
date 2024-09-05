@@ -69,6 +69,7 @@ class Publisher:
             self.publish_to_topic(message, exchange, routing_key)  # Retry publishing
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
+            print(f'{message}, {exchange}, {routing_key}')
 
     def disconnect(self) -> None:
         """Close the connection to RabbitMQ."""

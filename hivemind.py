@@ -28,10 +28,14 @@ def from_bot_callback(ch, method, properties, body) -> None:
     print("bot_callback")
 
     bot_data = decode_json_object(body)
-    if not task_processing.is_set():
+    print(task_processing.is_set())
+    print(initial_event.is_set())
+    if not task_processing.is_set() or initial_event.is_set():
         print(f"Received {bot_data} from {method.routing_key}")
         bot_queue_dict.update({bot_data['id']:bot_data})
         print(bot_queue_dict)
+
+        initial_event.clear()
     else:
         print("Currently processing a task, ignoring bot location update.")
 
@@ -54,6 +58,7 @@ def publish_task(publisher:Publisher) -> None:
         task = task_queue.get()
 
         task_processing.set()
+
         bot_curr_loc = bot_queue_dict
         selected_task,bot_queue = compare_userLoc_botLoc(task,bot_curr_loc)
         publisher.publish_to_queue(selected_task, queue=bot_queue)
@@ -104,7 +109,7 @@ def compare_userLoc_botLoc(usr_data:dict, bot_data:dict):
     print(f"usrLoc: {usr_data}")
     print(f"botLoc: {bot_data}")
 
-    return {'user': {'location': 'usrLoc1', 'hallNr': 4, 'floor': 0, 'x': 10, 'y': 24},
+    return {'user': usr_data,
             'destination': {'destination': 'dest1', 'hallNr': 2, 'floor': 0, 'x': 235, 'y': 134}
             }, 'tasks.bot1'
 
@@ -121,10 +126,13 @@ if __name__ == '__main__':
     # queue for the tasks received by the webserver
     task_queue = queue.Queue()
 
+
     # dictionary of the bot routing_key (as key) and its data as the value
     # for distribution and keeping track of where the data comes from
     bot_queue_dict = {}
 
+    initial_event = threading.Event()
+    initial_event.set()
     # an event-trigger for sending the notifications after receiving a new task
     new_task_event = threading.Event()
     task_processing = threading.Event()
@@ -185,7 +193,7 @@ if __name__ == '__main__':
     pub_task_notification_Thread = threading.Thread(target=notify,args=(pub_task_notification,'newTask'))
 
     # publishes the tasks for specific bots on their respective queue
-    pub_bot_task_Thread = threading.Thread(target=publish_task, args=())
+    pub_bot_task_Thread = threading.Thread(target=publish_task, args=(pub_bot_task,))
 
     # publishes the coordinates of the chosen bot back to the webserver/client periodically
     # ...put here...
