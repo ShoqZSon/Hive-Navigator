@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # subscriber to the notifications queue
     sub_task_notification = Subscriber(message_broker_host, message_broker_port)
     # subscriber for the bot tasks that listens on his own queue bot.{bot_id}
-    sub_bot_tasks = Subscriber(message_broker_host, message_broker_port)
+    #sub_bot_tasks = Subscriber(message_broker_host, message_broker_port)
 
 
     # ---- Connections to RabbitMQ ---- #
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     sub_task_notification.connect()
     #sub_bot_tasks.connect()
 
-    pub_one_time_notification.publish_to_queue(bot.getId(),'initial_existence_share',auto_delete=True,durable=False)
+    pub_one_time_notification.publish_to_queue(bot.getBotData(),'initial_existence_share',auto_delete=True,durable=False)
     pub_one_time_notification.disconnect()
 
 

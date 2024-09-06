@@ -27,7 +27,8 @@ class Bot:
         while True:
             self.publish_event.wait()
 
-            botData = self.getBotData()
+            botData_raw = self.getBotData()
+            botData = json.loads(botData_raw)
             print("publishing the bot data now")
             publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
 
