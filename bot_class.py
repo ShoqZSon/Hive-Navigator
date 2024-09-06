@@ -47,7 +47,6 @@ class Bot:
                 time.sleep(5)
 
     def notificationCallback(self, ch, method, properties, body):
-        print(json.dumps(body))
         self.publish_event.set()
         print("publish_even is set")
 
