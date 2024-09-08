@@ -49,7 +49,7 @@ class Bot:
             while True:
                 task = self.taskQueue.get()
                 print(f"Executing task {task}")
-                for i in range(5):
+                for i in range(20):
                     print(f"x: {self.Coordinates['x'] + i}")
                     print(f"y: {self.Coordinates['y'] + i * 2}")
                 self.taskQueue.task_done()

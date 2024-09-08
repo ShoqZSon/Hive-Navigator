@@ -52,17 +52,19 @@ if __name__ == "__main__":
     # subscribes the notification queue in order to let the bot know when to publish its data
     sub_task_notification_Thread = threading.Thread(target=sub_task_notification.subscribe_to_topic,args=(bot.notificationCallback,'notification_topic',f'notifications_{bot.getId()}','notification.*'))
     sub_bot_tasks_Thread = threading.Thread(target=sub_bot_tasks.subscribe_to_queue, args=(bot.addTask_callback,f'tasks.{bot.getId()}'))
+    executing_tasks_Thread = threading.Thread(target=bot.executeTask,args=())
 
     # starts the threads
     pub_bot_curr_loc_Thread.start()
     sub_task_notification_Thread.start()
     sub_bot_tasks_Thread.start()
+    executing_tasks_Thread.start()
 
     # closes the threads gracefully
     pub_bot_curr_loc_Thread.join()
     sub_task_notification_Thread.join()
     sub_bot_tasks_Thread.join()
-
+    executing_tasks_Thread.join()
 
     # ---- Closing the RabbitMQ connections ---- #
 
