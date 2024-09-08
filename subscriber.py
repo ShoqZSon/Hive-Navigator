@@ -1,6 +1,7 @@
 import pika
 import pika.exceptions
 import time
+import keyboard
 
 
 class Subscriber:
@@ -9,6 +10,11 @@ class Subscriber:
         self.__port = port
         self.__connection = None
         self.__channel = None
+        self.__stop_listening = False
+
+    def on_escape_press(self,event):
+        if event.name == 'esc':
+            self.__stop_listening = True
 
     def connect(self) -> None:
         """Establish a connection to RabbitMQ."""
@@ -75,7 +81,7 @@ class Subscriber:
 
         self.__channel.start_consuming()
 
-    def subscribe_to_queue_tmp(self,callback,queue:str, timeout:int):
+    def subscribe_to_queue_tmp(self,callback,queue:str):
         """Start consuming messages from a specific queue."""
         if self.__channel is None:
             raise Exception("Subscriber is not connected.")
@@ -88,14 +94,9 @@ class Subscriber:
                                      auto_ack=True)
 
         print(f" [*] Waiting for messages in [{queue}]")
-
-        start_time = time.time()
-        while True:
-            # Check if the timeout period has elapsed
-            if time.time() - start_time > timeout:
-                print("Timeout reached. Stopping...")
-                break
-
+        print('Press "esc" to stop waiting')
+        keyboard.on_press(self.on_escape_press)
+        while not self.__stop_listening:
             # Process incoming messages
             self.__connection.process_data_events()
             time.sleep(1)  # Sleep to avoid busy-waiting
