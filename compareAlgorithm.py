@@ -12,6 +12,7 @@ def compare_userLoc_botLoc(task:dict, bot_data:dict):
     """
     print("Comparing userLoc and botLoc")
     print(f"task: {task}")
+    print(f'UserLoc: ...')
     print(f"botLoc: {bot_data}")
 
 

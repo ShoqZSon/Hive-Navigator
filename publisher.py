@@ -33,6 +33,7 @@ class Publisher:
             # ensures the queue exists before use.
             self.__channel.queue_declare(queue=queue, durable=durable,auto_delete=auto_delete)
 
+            print(type(message))
             self.__channel.basic_publish(exchange='',
                                        routing_key=queue,
                                        body=message)

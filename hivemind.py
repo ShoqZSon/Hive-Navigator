@@ -1,5 +1,4 @@
 import sys
-
 import pika.exceptions
 from publisher import Publisher
 from subscriber import Subscriber
@@ -9,6 +8,12 @@ import queue
 import time
 from compareAlgorithm import *
 
+# ---- Global Variables ---- #
+bot_num = 0
+bot_queue_lock = threading.Lock()  # For protecting shared resources like thread_count
+bot_data_event = threading.Event()  # Event to signal that all bots have reported in
+bot_initial_lock = threading.Lock()
+bot_initial_event = threading.Event()
 
 # Callbacks - Subscriber Functions
 def from_webserver_task_callback(ch, method, properties, body) -> None:
@@ -20,22 +25,32 @@ def from_webserver_task_callback(ch, method, properties, body) -> None:
     """
     print("webserver_task_callback")
     task = decode_json_object(body)
-    print(f"Received a new task: {task} from {method.routing_key}")
+    print(f"Received a new task: [{task}] from [{method.routing_key}]")
 
     # Enqueue the task for publishing and set the event
     task_queue.put(task)
+
+    new_task_event.set()
 
 def from_bot_callback(ch, method, properties, body) -> None:
     print("bot_callback")
 
     bot_data = decode_json_object(body)
-    print(f'Received new bot data: {bot_data} from {method.routing_key}')
-    bot_queue_dict.update({bot_data['id']:bot_data})
-    print(bot_queue_dict)
+    print(f'Received new bot data: [{bot_data}] from [{method.routing_key}]')
+    with bot_queue_lock:
+        if bot_data['state'] == 0 or bot_data['state'] == 2:
+            bot_queue_dict.update({bot_data['id']:bot_data})
+        else:
+            print(f'bot is being ignored due to its state: [{bot_data["state"]}]')
+        print(bot_queue_dict)
+
+    if len(bot_queue_dict) == bot_num:
+        bot_data_event.set()
 
 def get_all_bots(ch, method, properties, body):
     bot_data = decode_json_object(body)
     bot_id = bot_data['id']
+
     if bot_id not in bot_queue_dict:
         bot_queue_dict.update({bot_id: bot_data})
 
@@ -50,23 +65,24 @@ def publish_task(publisher:Publisher) -> None:
     """
     while True:
         print("publish_task")
-        # Wait for a task to be available in the queue and removes the task from the queue when available
-        task = task_queue.get()
-        # sends a notification to all the bots when a new task gets processed
-        new_task_event.set()
-        print(task_processing.is_set())
-        task_processing.wait()
+        while True:
+            # Wait for a task to be available in the queue and removes the task from the queue when available
+            task = task_queue.get()
+            # sends a notification to all the bots when a new task gets processed
+            bot_data_event.wait()
+            with bot_queue_lock:
+                    bot_curr_loc = bot_queue_dict.copy()
+                    selected_task,bot_queue = compare_userLoc_botLoc(task,bot_curr_loc)
 
-        bot_curr_loc = bot_queue_dict
-        selected_task,bot_queue = compare_userLoc_botLoc(task,bot_curr_loc)
-        print(f'Selected task: {selected_task}')
-        print(f'Sent selected task to: {bot_queue}')
-        #publisher.publish_to_queue(message=selected_task, queue=bot_queue)
-        #print(f"Published task {selected_task}")
+            selected_task = json.dumps(selected_task)
 
-        task_queue.task_done()
+            print(f'Sent selected task [{selected_task}] to [{bot_queue}]')
+            publisher.publish_to_queue(message=selected_task, queue=bot_queue)
+            print(f"Published task [{selected_task}]")
 
-        task_processing.clear()
+            task_queue.task_done()
+
+            bot_data_event.clear()
 
 def notify(publisher:Publisher,message='') -> None:
     """ Waits for the new_task_event to trigger. If triggered this function publishes a message on a notification_queue
@@ -79,7 +95,7 @@ def notify(publisher:Publisher,message='') -> None:
     while True:
         new_task_event.wait()
         try:
-            print("notify queue")
+            print("Notifying the bots")
             publisher.publish_to_topic(message=message,exchange='notification_topic',routing_key='notification.info')
         except (pika.exceptions.StreamLostError, pika.exceptions.AMQPChannelError) as e:
             print(f"Error during notification publishing: {e}. Reconnecting...")
@@ -92,21 +108,19 @@ def notify(publisher:Publisher,message='') -> None:
 # ------------------------------- #
 
 def check_queue():
+    """Periodically checks and prints the task queue and bot queue status."""
     while True:
-        if not task_queue.empty() and not task_processing.is_set():
-            new_task_event.set()
-        time.sleep(1)
-
-def showQueues():
-    while True:
-        task_items = list(task_queue.queue)
-        bot_loc_items = list(bot_loc_queue.queue)
+        with bot_queue_lock:
+            task_items = list(task_queue.queue)
+            bot_items = list(bot_queue_dict.items())
         print(f'Current Task Queue: {task_items}')
-        print(f'Current Bot Location Queue: {bot_loc_items}')
-
-        time.sleep(7)
+        print(f'Current Bot Data: {bot_items}')
+        time.sleep(5)
 
 if __name__ == '__main__':
+    # a semaphore for the count
+    count_semaphore = threading.Semaphore(1)
+
     # queue for the tasks received by the webserver
     task_queue = queue.Queue()
 
@@ -114,12 +128,9 @@ if __name__ == '__main__':
     # for distribution and keeping track of where the data comes from
     bot_queue_dict = {}
 
-    #initial_event = threading.Event()
-    #initial_event.set() # true at the beginning
-
     # an event-trigger for sending the notifications after receiving a new task
     new_task_event = threading.Event()
-    task_processing = threading.Event()
+    thread_count = 0
 
     message_broker_host = '192.168.56.106'
     message_broker_port = 5672
@@ -153,10 +164,10 @@ if __name__ == '__main__':
     pub_bot_task.connect()
 
     # receives an initial notification from every bot that they exist
-    sub_one_time_notification.subscribe_to_queue_tmp(get_all_bots,'initial_existence_share',10)
+    sub_one_time_notification.subscribe_to_queue_tmp(get_all_bots,'initial_existence_share')
     sub_one_time_notification.disconnect()
 
-    bot_num = len(bot_queue_dict)
+    bot_num = len(bot_queue_dict) # amount of bots available in the system
     print(f'Amount of bots is set to {bot_num}')
 
 
