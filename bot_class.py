@@ -60,6 +60,7 @@ class Bot:
                 self.taskQueue.task_done()
 
                 self.execute_event.clear()
+                self.state = 0
                 time.sleep(1)
 
     def notificationCallback(self, ch, method, properties, body):
