@@ -7,6 +7,7 @@ from hivemind_utility import *
 import threading
 import queue
 import time
+from compareAlgorithm import *
 
 
 # Callbacks - Subscriber Functions
@@ -28,21 +29,15 @@ def from_bot_callback(ch, method, properties, body) -> None:
     print("bot_callback")
 
     bot_data = decode_json_object(body)
-    print(task_processing.is_set())
-    print(initial_event.is_set())
-    if not task_processing.is_set() or initial_event.is_set():
-        print(f"Received {bot_data} from {method.routing_key}")
-        bot_queue_dict.update({bot_data['id']:bot_data})
-        print(bot_queue_dict)
-
-        initial_event.clear()
-    else:
-        print("Currently processing a task, ignoring bot location update.")
+    print(f'Received new bot data: {bot_data} from {method.routing_key}')
+    bot_queue_dict.update({bot_data['id']:bot_data})
+    print(bot_queue_dict)
 
 def get_all_bots(ch, method, properties, body):
-    bot_id = body.decode("utf-8")
+    bot_data = decode_json_object(body)
+    bot_id = bot_data['id']
     if bot_id not in bot_queue_dict:
-        bot_queue_dict.update({bot_id: None})
+        bot_queue_dict.update({bot_id: bot_data})
 
 
 # ---- Publisher Functions ---- #
@@ -54,32 +49,38 @@ def publish_task(publisher:Publisher) -> None:
     :return: None
     """
     while True:
+        print("publish_task")
         # Wait for a task to be available in the queue and removes the task from the queue when available
         task = task_queue.get()
-
-        task_processing.set()
+        # sends a notification to all the bots when a new task gets processed
+        new_task_event.set()
+        print(task_processing.is_set())
+        task_processing.wait()
 
         bot_curr_loc = bot_queue_dict
         selected_task,bot_queue = compare_userLoc_botLoc(task,bot_curr_loc)
-        publisher.publish_to_queue(message=selected_task, queue=bot_queue)
-        print(f"Published task {selected_task}")
-
-        task_processing.clear()
+        print(f'Selected task: {selected_task}')
+        print(f'Sent selected task to: {bot_queue}')
+        #publisher.publish_to_queue(message=selected_task, queue=bot_queue)
+        #print(f"Published task {selected_task}")
 
         task_queue.task_done()
 
+        task_processing.clear()
+
 def notify(publisher:Publisher,message='') -> None:
     """ Waits for the new_task_event to trigger. If triggered this function publishes a message on a notification_queue
+
     :param publisher:
     :param message: The message to be published (defaults to 'newTask')
+
     :return: None
     """
     while True:
         new_task_event.wait()
         try:
-            if task_processing.is_set():
-                print("notify queue")
-                publisher.publish_to_topic(message=message,exchange='notification_topic',routing_key='notification.info')
+            print("notify queue")
+            publisher.publish_to_topic(message=message,exchange='notification_topic',routing_key='notification.info')
         except (pika.exceptions.StreamLostError, pika.exceptions.AMQPChannelError) as e:
             print(f"Error during notification publishing: {e}. Reconnecting...")
             publisher.connect()  # Reconnect
@@ -96,29 +97,6 @@ def check_queue():
             new_task_event.set()
         time.sleep(1)
 
-# TODO: Implement the comparison algorithm and send the correct task to the bot
-def compare_userLoc_botLoc(usr_data:dict, bot_data:dict):
-    """ The algorithm to determine which bot is the best fit for the task.
-    Decides by comparing every bot_data x,y coordinate + the hall-nr with the corresponding values in usr_data
-
-    :param usr_data:
-    :param bot_data:
-
-    :return:
-    """
-    print("Comparing userLoc and botLoc")
-    print(f"usrLoc: {usr_data}")
-    print(f"botLoc: {bot_data}")
-
-    task = {'user': usr_data,
-            'destination': {'destination': 'dest1', 'hallNr': 2, 'floor': 0, 'x': 235, 'y': 134}
-            }
-    task = json.dumps(task)
-
-    myqueue = 'tasks.bot1'
-
-    return task,myqueue
-
 def showQueues():
     while True:
         task_items = list(task_queue.queue)
@@ -132,13 +110,13 @@ if __name__ == '__main__':
     # queue for the tasks received by the webserver
     task_queue = queue.Queue()
 
-
     # dictionary of the bot routing_key (as key) and its data as the value
     # for distribution and keeping track of where the data comes from
     bot_queue_dict = {}
 
-    initial_event = threading.Event()
-    initial_event.set()
+    #initial_event = threading.Event()
+    #initial_event.set() # true at the beginning
+
     # an event-trigger for sending the notifications after receiving a new task
     new_task_event = threading.Event()
     task_processing = threading.Event()
@@ -184,9 +162,7 @@ if __name__ == '__main__':
 
     # ---- Thread Area ---- #
 
-    #show_queue_Thread = threading.Thread(target=showQueues)
-
-    set_notification_event = threading.Thread(target=check_queue)
+    #set_notification_event = threading.Thread(target=check_queue)
 
     # subscribe to the tasks send from the webserver (queue = 'rawTasksQueue')
     sub_webserver_task_queue_Thread = threading.Thread(target=sub_webserver_task_queue.subscribe_to_queue, args=(from_webserver_task_callback,'rawTaskQueue'))
@@ -196,7 +172,7 @@ if __name__ == '__main__':
 
     # publish a notification inside the queue 'notification' to the bots to notify them of new tasks
     # and trigger their publish method which sends their current location data
-    pub_task_notification_Thread = threading.Thread(target=notify,args=(pub_task_notification,'newTask'))
+    pub_task_notification_Thread = threading.Thread(target=notify, args=(pub_task_notification, 'newTask'))
 
     # publishes the tasks for specific bots on their respective queue
     pub_bot_task_Thread = threading.Thread(target=publish_task, args=(pub_bot_task,))
@@ -205,7 +181,6 @@ if __name__ == '__main__':
     # ...put here...
 
     # starts the threads
-    #show_queue_Thread.start()
 
     sub_webserver_task_queue_Thread.start()
     sub_botCurrLoc_Thread.start()
@@ -213,7 +188,6 @@ if __name__ == '__main__':
     pub_bot_task_Thread.start()
 
     # closes the threads gracefully
-    #show_queue_Thread.join()
 
     sub_webserver_task_queue_Thread.join()
     sub_botCurrLoc_Thread.join()
