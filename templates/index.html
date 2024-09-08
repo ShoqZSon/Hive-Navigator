@@ -5,77 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baymax - Guide Service</title>
     <!-- Local Bootstrap CSS -->
-    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
     <link href="../static/css/basic.css" rel="stylesheet">
-    <style>
-        .center-section {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            gap: 20px;
-            margin: 10px;
-        }
-        .dropdown {
-            margin: 0;
-        }
-        .dropdown-menu {
-            display: none;
-        }
-        .dropdown-menu.show {
-            display: block;
-        }
-        .btn {
-            width: 200px;
-            height: 60px;
-            padding: 5px;
-            background-color: darkkhaki;
-            color: black;
-            border-color: black;
-        }
-        .btn:hover {
-            background-color: lightyellow;
-            color: black;
-            border-color: black;
-        }
-        .buttons {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 100px;
-        }
-        .btn-success:hover {
-            background-color: yellowgreen;
-            color:black;
-        }
-        .btn-reset:hover {
-            background-color: red;
-            color: white;
-        }
-        .btn-reset {
-            padding-left: 50px;
-            padding-right: 50px;
-        }
-        .mt-4 {
-            margin: 10px;
-        }
-    </style>
+    <link href="../static/css/index.css" rel="stylesheet">
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
     <header class="header bg-light">
         <nav class="navbar navbar-light">
             <a class="navbar-brand" href="index.html">Baymax</a>
-            <a class="navbar-brand" href="../theProject.html">The Project</a>
-            <a class="navbar-brand" href="../impressum.html">Impressum</a>
+            <a class="navbar-brand" href="../static/theProject.html">The Project</a>
+            <a class="navbar-brand" href="../static/impressum.html">Impressum</a>
         </nav>
     </header>
 
     <!-- Task Submition Form -->
     <form action="/submit" method="post" id="submitForm">
         <div class="center-section">
-            <!-- User Location Dropdown -->
-            <!-- TODO: Change this button to a html location (location of the terminal) or the current location of the user (if used by phone) -->
+            <!-- User Location -->
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown_loc" data-bs-toggle="dropdown" aria-expanded="false">
                     Select your location
@@ -89,37 +37,62 @@
                 </ul>
                 <input type="hidden" name="location" id="location">
             </div>
-
-            <!-- Destination Dropdown -->
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_dest" data-bs-toggle="dropdown" aria-expanded="false">
-                    Select your destination
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdown_dest">
-                    <li><a class="dropdown-item" data-value="Dest1">Dest 1</a></li>
-                    <li><a class="dropdown-item" data-value="Dest2">Dest 2</a></li>
-                    <li><a class="dropdown-item" data-value="Dest3">Dest 3</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" onclick="resetDest()">Reset selected destination</a></li>
-                </ul>
-                <input type="hidden" name="destination" id="destination">
-            </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="buttons">
-            <!-- Button for sending the data -->
-            <div class="mt-4">
-                <button class="btn btn-success" type="submit">
-                    Send Baymax to my location!
-                </button>
+            <!-- User Destination Table -->
+            <div class="table">
+                <!-- <h4>Select your destination</h4> -->
+                <table id="destTable" class="display">
+                    <thead id="dest_tableHead">
+                        <tr>
+                            <th>Stand-Name</th>
+                            <th>Stand-Nr</th>
+                            <th>Hallen-Nr</th>
+                            <th>Ebene</th>
+                            <th>Thema</th>
+                            <th class="hidden">x</th>
+                            <th class="hidden">y</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dest_tableBody">
+                        <tr>
+                            <td>TechInnovations</td>
+                            <td>101</td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>Technologie</td>
+                            <td class="hidden">2</td>
+                            <td class="hidden">30</td>
+                        </tr>
+                        <tr>
+                            <td>GreenEnergy Solutions</td>
+                            <td>205</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>Erneuerbare Energien</td>
+                            <td class="hidden">15</td>
+                            <td class="hidden">20</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="hidden" name="destination" id="destination">
             </div>
 
-            <!-- Button to reset the dropdowns -->
-            <div class="mt-4">
-                <button class="btn btn-reset" type="button" onclick="resetLocDest()">
-                    Reset!
-                </button>
+            <!-- Action Buttons -->
+            <div class="buttons">
+                <!-- Button for sending the data -->
+                <div class="mt-4">
+                    <button class="btn" id="btn-success" type="submit">
+                        Send Baymax to my location!
+                    </button>
+                </div>
+
+                <!-- Button to reset the dropdowns -->
+                <div class="mt-4">
+                    <button class="btn" type="button" id="btn-reset" onclick="resetLocDest()">
+                        Reset!
+                    </button>
+                </div>
             </div>
         </div>
     </form>
@@ -137,5 +110,10 @@
     <script src="../static/js/dropDownToggle.js"></script>
     <script src="../static/js/resetButton.js"></script>
     <script src="../static/js/checkSubmitCondition.js"></script>
+    <script src="../static/js/selectItemTable.js"></script>
+    <script src="../static/js/sortingTable.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 </body>
 </html>
