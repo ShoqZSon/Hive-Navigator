@@ -40,6 +40,7 @@ def from_bot_callback(ch, method, properties, body) -> None:
             bot_queue_dict.update({bot_data['id']:bot_data})
         else:
             print(f'bot is being ignored due to its state: [{bot_data["state"]}]')
+            bot_queue_dict.update({bot_data['id']:None})
         print(bot_queue_dict)
 
     if len(bot_queue_dict) == bot_num:
