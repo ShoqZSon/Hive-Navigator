@@ -12,8 +12,6 @@ from compareAlgorithm import *
 bot_num = 0
 bot_queue_lock = threading.Lock()  # For protecting shared resources like thread_count
 bot_data_event = threading.Event()  # Event to signal that all bots have reported in
-bot_initial_lock = threading.Lock()
-bot_initial_event = threading.Event()
 
 # Callbacks - Subscriber Functions
 def from_webserver_task_callback(ch, method, properties, body) -> None:
@@ -76,9 +74,8 @@ def publish_task(publisher:Publisher) -> None:
 
             selected_task = json.dumps(selected_task)
 
-            print(f'Sent selected task [{selected_task}] to [{bot_queue}]')
+            print(f'Published selected task [{selected_task}] to [{bot_queue}]')
             publisher.publish_to_queue(message=selected_task, queue=bot_queue)
-            print(f"Published task [{selected_task}]")
 
             task_queue.task_done()
 
@@ -191,12 +188,16 @@ if __name__ == '__main__':
     # publishes the coordinates of the chosen bot back to the webserver/client periodically
     # ...put here...
 
+    # checks the queues periodically
+    debug_queue_Thread = threading.Thread(target=check_queue)
+
     # starts the threads
 
     sub_webserver_task_queue_Thread.start()
     sub_botCurrLoc_Thread.start()
     pub_task_notification_Thread.start()
     pub_bot_task_Thread.start()
+    debug_queue_Thread.start()
 
     # closes the threads gracefully
 
@@ -204,6 +205,7 @@ if __name__ == '__main__':
     sub_botCurrLoc_Thread.join()
     pub_task_notification_Thread.join()
     pub_bot_task_Thread.join()
+    debug_queue_Thread.join()
 
 
     # ---- Closing the RabbitMQ connections ---- #

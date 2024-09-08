@@ -53,8 +53,7 @@ class Bot:
             self.state = 1
             print(f"Executing task {task}")
             for i in range(20):
-                print(f"x: {self.Coordinates['x'] + i}")
-                print(f"y: {self.Coordinates['y'] + i * 2}")
+                print(f'(x: {self.Coordinates["x"] + i};y: {self.Coordinates["y"] + i * 2})')
                 time.sleep(2)
             self.taskQueue.task_done()
 

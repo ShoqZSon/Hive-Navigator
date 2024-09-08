@@ -76,4 +76,4 @@ class Publisher:
         """Close the connection to RabbitMQ."""
         if self.__connection:
             self.__connection.close()
-            print(f'Connection: {self.__connection.channel} has been disconnected.')
+            print(f'Connection has been closed.')
