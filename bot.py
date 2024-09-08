@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # subscribes to its own task queue for incoming tasks
     sub_bot_tasks_Thread = threading.Thread(target=sub_bot_tasks.subscribe_to_queue, args=(bot.addTask_callback,f'tasks.{bot.getId()}'))
 
-    executing_tasks_Thread = threading.Thread(target=bot.executeTask,args=())
+    executing_tasks_Thread = threading.Thread(target=bot.executeTask)
 
     # starts the threads
     pub_bot_curr_loc_Thread.start()
