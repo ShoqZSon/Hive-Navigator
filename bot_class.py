@@ -5,10 +5,18 @@ import threading
 
 class Bot:
     def __init__(self,bot_id=0,floor=0, hallNr=0):
+        """
+
+        :param bot_id:
+        :param floor:
+        :param hallNr:
+        state: 0 = idle, 1 on the job, 2 back to source # WIP on the naming
+        """
         self.id = bot_id
         self.hallNr = hallNr
         self.floor = floor
         self.Coordinates = {'x': 0, 'y': 0}
+        self.state = 0
         self.taskQueue = queue.Queue()
         self.publish_event = threading.Event()
 
@@ -19,7 +27,8 @@ class Bot:
             'hall': self.hallNr,
             'floor': self.floor,
             'x': self.Coordinates['x'],
-            'y': self.Coordinates['y']
+            'y': self.Coordinates['y'],
+            'state': self.state
         }
         return json.dumps(data)
 
@@ -48,7 +57,6 @@ class Bot:
 
     def notificationCallback(self, ch, method, properties, body):
         self.publish_event.set()
-        print("publish_even is set")
 
     def addTask_callback(self,ch, method, properties, body):
         task = json.loads(body)
@@ -70,3 +78,6 @@ class Bot:
 
     def getTaskQueue(self):
         return self.taskQueue
+
+    def getState(self):
+        return self.state
