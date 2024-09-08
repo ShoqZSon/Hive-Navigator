@@ -19,6 +19,7 @@ class Bot:
         self.state = 0
         self.taskQueue = queue.Queue()
         self.publish_event = threading.Event()
+        self.execute_event = threading.Event()
 
     def getBotData(self):
         """Pack the bot's coordinates into a JSON string."""
@@ -48,12 +49,14 @@ class Bot:
         if not self.taskQueue.empty():
             while True:
                 task = self.taskQueue.get()
+                self.execute_event.wait()
                 print(f"Executing task {task}")
                 for i in range(20):
                     print(f"x: {self.Coordinates['x'] + i}")
                     print(f"y: {self.Coordinates['y'] + i * 2}")
                 self.taskQueue.task_done()
-                time.sleep(5)
+                self.execute_event.clear()
+                time.sleep(1)
 
     def notificationCallback(self, ch, method, properties, body):
         self.publish_event.set()
@@ -63,6 +66,7 @@ class Bot:
         if task not in self.taskQueue.queue:
             self.taskQueue.put(task)
             print(f"Added task: {task} to taskQueue of bot {self.id}")
+            self.execute_event.set()
 
     def getId(self):
         return self.id
