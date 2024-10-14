@@ -1,15 +1,19 @@
-from queue import Queue
-import json
 from math import fabs
+from math import dist
 
 def compare_userLoc_botLoc(task:dict, bot_data:dict):
-    """ The algorithm to determine which bot is the best fit for the task.
+    """
+    The algorithm to determine which bot is the best fit for the task.
     Decides by comparing every bot_data x,y coordinate + the hall-nr with the corresponding values in usr_data
 
-    :param task:
-    :param bot_data:
+    Parameters
+    ----------
+    task
+    bot_data
 
-    :return:
+    Returns
+    -------
+
     """
     comparison_storage = {}
 
@@ -27,20 +31,22 @@ def compare_userLoc_botLoc(task:dict, bot_data:dict):
 
         if value['floor'] == location['floor']:
             hall_diff = int(fabs(value['hall'] - location['hall']))
-            x_diff = int(fabs(value['x'] - location['x']))
-            y_diff = int(fabs(value['y'] - location['y']))
+            distance_diff = dist((value['x'],value['y']),(location['x'],location['y']))
 
             comparison_storage[key] = {
                 'hall_diff':hall_diff,
-                'x_diff':x_diff,
-                'y_diff':y_diff
+                'euclid_dist': distance_diff
             }
 
     # Sort by 'name' in the inner dictionaries
-    sorted_comparison_storage = dict(sorted(comparison_storage.items(), key=lambda item: item[1]['hall_diff']))
+    sorted_comparison_storage = dict(
+        sorted(comparison_storage.items(), key=lambda item: (item[1]['hall_diff'], item[1]['euclid_dist']))
+    )
     print(sorted_comparison_storage)
 
-    best_queue = next(iter(sorted_comparison_storage))
+    # choose the bot that fulfills the criteria the best
+    # returns None if there are no bots on the same floor
+    best_queue = next(iter(sorted_comparison_storage), None)
     print(best_queue)
 
     return task,best_queue

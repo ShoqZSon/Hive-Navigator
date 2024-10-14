@@ -61,7 +61,6 @@ def sendDataToRabbitMQ(message, host:str, port:int,queue='rawTaskQueue') -> None
     :param host: The host of the RabbitMQ server
     :param port: The port of the RabbitMQ server
     :param queue: The queue to send messages to (defaults to 'rawTaskQueue')
-    :return: None
     """
     pub_webserver_task_queue = Publisher(host=host, port=port)
     pub_webserver_task_queue.connect()
@@ -75,8 +74,6 @@ def receiveBotData(host:str, port:int,queue='botTaskQueue'):
     :param host:
     :param port:
     :param queue:
-
-    :return: None
     """
     sub_bot_data = Subscriber(host=host, port=port)
     sub_bot_data.connect()
@@ -91,8 +88,10 @@ def main_page():
 def submit():
     """/submit route is supposed to receive the data from index.html and sends it further
 
-    This route receives the data (location and destination of the customer).
-    Another sendData method is called which sends the data to the given host and port.
+    This route receives the data (location of the terminal and the destination of the customer).
+    1. The Hall-Nr, Floor, x and y coordinate get extracted from the dictionaries with extractData().
+    2. The extracted data gets transformed to a json object => prepared for sending properly.
+    3. The json data gets sent to the message broker on given host, port and into the rawTaskQueue.
 
     Arguments
     ---------
@@ -101,9 +100,12 @@ def submit():
     Important Variables
     -------------------
         location: right now -> string with one entry
+            location represents the coordinates of the terminal
         destination: Stand-Name, Stand-Nr, Hallen-Nr, Ebene, Thema, x-coordinate, y-coordinate
             After trimming -> Stand-Nr, Hallen-Nr, Ebene, x-coordinate, y-coordinate
 
+    It is possible to just keep sending tasks into the queue without anyone using them.
+    This will just stack the tasks.
     """
     location = request.form.get('location')
     destination = request.form.get('destination')
@@ -118,8 +120,7 @@ def submit():
 
     # prepares the data for sending
     dataToSend = prepData(location, destination)
-
-    # send the data to rabbitMQ
+    # append new task to the rawTaskQueue
     sendDataToRabbitMQ(dataToSend,'192.168.56.106',5672,'rawTaskQueue')
 
     return redirect(url_for('success'))

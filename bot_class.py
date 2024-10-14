@@ -11,10 +11,13 @@ class Bot(Node):
     def __init__(self,bot_id=0,floor=0, hallNr=0):
         """
 
-        :param bot_id:
-        :param floor:
-        :param hallNr:
-        state: 0 = idle, 1 on the job, 2 back to source # WIP on the naming
+        Parameters
+        ----------
+        bot_id
+        floor
+        hallNr
+
+        state -> 0 = idle, 1 on the job, 2 back to source # WIP on the naming
         """
         super().__init__('bot_node')
         self.id = bot_id
@@ -28,7 +31,7 @@ class Bot(Node):
         rclpy.init()
 
     def getBotData(self):
-        """Pack the bot's nates into a JSON string."""
+        """Pack the bot's data into a JSON string."""
         data = {
             'id': self.id,
             'hall': self.hallNr,
@@ -105,10 +108,15 @@ class Bot(Node):
         return self.floor
 
     def getCoordinates(self):
-        return self.Coordinates
+        return self.coordinates
 
     def getTaskQueue(self):
         return self.taskQueue
 
     def getState(self):
         return self.state
+
+    def setXY(self,x,y):
+        self.coordinates['x'] = x
+        self.coordinates['y'] = y
+

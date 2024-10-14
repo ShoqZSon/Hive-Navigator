@@ -10,10 +10,12 @@ import queue
 task_queue = queue.Queue()
 
 if __name__ == "__main__":
-    bot_id = sys.argv[1]
+    #bot_id = sys.argv[1]
     #bot_hallNr = int(sys.argv[2])
     #bot_level = int(sys.argv[3])
-    #bot_id = 'bot1'
+    #bot_x = int(sys.argv[4]
+    #bot_y = int(sys.argv[5])
+    bot_id = 'bot3'
     bot_hallNr = 1
     bot_level = 0
 
@@ -21,6 +23,7 @@ if __name__ == "__main__":
     message_broker_port = 5672
 
     bot = Bot(bot_id,bot_hallNr,bot_level)
+    bot.setXY(85,120)
 
     # ---- Publisher & Subscriber Initialization ---- #
 
@@ -42,13 +45,14 @@ if __name__ == "__main__":
     sub_task_notification.connect()
     sub_bot_tasks.connect()
 
-    pub_one_time_notification.publish_to_queue(bot.getBotData(),'initial_existence_share',auto_delete=True,durable=False)
+    pub_one_time_notification.publish_to_queue(bot.getBotData(),'registration',auto_delete=True,durable=False)
     pub_one_time_notification.disconnect()
 
 
     # ---- Thread Area ---- #
 
-    # publishes the bot data towards the hivemind for processing waits until a notification from the hivemind gets sent
+    # publishes the bot data towards the hivemind for processing
+    # waits until a notification from the hivemind gets sent
     pub_bot_curr_loc_Thread = threading.Thread(target=bot.publishBotData,args=(pub_bot_curr_loc,))
     # subscribes the notification queue in order to let the bot know when to publish its data
     sub_task_notification_Thread = threading.Thread(target=sub_task_notification.subscribe_to_topic,args=(bot.notificationCallback,'notification_topic',f'notifications_{bot.getId()}','notification.*'))
