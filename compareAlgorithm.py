@@ -1,7 +1,7 @@
 from math import fabs
 from math import dist
 
-def compare_userLoc_botLoc(task:dict, bot_data:dict):
+def compareUserLocBotLoc(task:dict, bot_data:dict):
     """
     The algorithm to determine which bot is the best fit for the task.
     Decides by comparing every bot_data x,y coordinate + the hall-nr with the corresponding values in usr_data

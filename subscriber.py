@@ -30,7 +30,7 @@ class Subscriber:
                 print(f"Connection failed: {e}. Retrying in 5 seconds...")
                 time.sleep(5)
 
-    def subscribe_to_queue(self,callback,queue:str) -> None:
+    def subscribeToQueue(self,callback,queue:str) -> None:
         """Start consuming messages from a specific queue."""
         if self.__channel is None:
             raise Exception("Subscriber is not connected.")
@@ -46,7 +46,7 @@ class Subscriber:
 
         self.__channel.start_consuming()
 
-    def subscribe_to_topic(self, callback, exchange:str, queue:str, routing_key:str) -> None:
+    def subscribeToTopic(self, callback, exchange:str, queue:str, routing_key:str) -> None:
         """
         Bind a queue to a topic exchange to receive messages based on the routing key pattern.
 
@@ -81,7 +81,7 @@ class Subscriber:
 
         self.__channel.start_consuming()
 
-    def subscribe_to_queue_tmp(self,callback,queue:str):
+    def subscribeToQueueTmp(self,callback,queue:str):
         """Start consuming messages from a specific queue."""
         if self.__channel is None:
             raise Exception("Subscriber is not connected.")

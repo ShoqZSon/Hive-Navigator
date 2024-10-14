@@ -24,7 +24,7 @@ class Publisher:
                 print(f"Connection failed: {e}. Retrying in 5 seconds...")
                 time.sleep(5)
 
-    def publish_to_queue(self, message, queue:str,auto_delete=False,durable=True) -> None:
+    def publishToQueue(self, message, queue:str,auto_delete=False,durable=True) -> None:
         """Publish a message to the specified queue."""
         try:
             if self.__channel is None:
@@ -41,12 +41,12 @@ class Publisher:
         except (pika.exceptions.StreamLostError,pika.exceptions.AMQPChannelError) as e:
             print(f"Publishing error: {e}. Reconnecting...")
             self.connect()  # Reconnect
-            self.publish_to_queue(message, queue)  # Retry publishing
+            self.publishToQueue(message, queue)  # Retry publishing
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
             print(f'publish_to_queue: {message}, {queue}')
 
-    def publish_to_topic(self, message, exchange:str, routing_key:str) -> None :
+    def publishToTopic(self, message, exchange:str, routing_key:str) -> None :
         """Publish a message to all queues bound to a fanout exchange."""
         try:
             if self.__channel is None:
@@ -67,7 +67,7 @@ class Publisher:
         except (pika.exceptions.StreamLostError,pika.exceptions.AMQPChannelError) as e:
             print(f"Publishing error: {e}. Reconnecting...")
             self.connect()  # Reconnect
-            self.publish_to_topic(message, exchange, routing_key)  # Retry publishing
+            self.publishToTopic(message, exchange, routing_key)  # Retry publishing
         except Exception as e:
             print(f"Unexpected error during publishing: {e}")
             print(f'publish_to_topic: {message}, {exchange}, {routing_key}')

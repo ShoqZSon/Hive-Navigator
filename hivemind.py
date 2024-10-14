@@ -31,7 +31,7 @@ def from_webserver_task_callback(ch, method, properties, body):
 
     """
     print("webserver_task_callback")
-    task = decode_json_object(body)
+    task = decodeJsonObject(body)
     print(f"Received a new task: [{task}] from [{method.routing_key}]")
 
     # Enqueue the task for publishing
@@ -59,7 +59,7 @@ def from_bot_callback(ch, method, properties, body) -> None:
     """
     print("bot_callback")
 
-    bot_data = decode_json_object(body)
+    bot_data = decodeJsonObject(body)
     print(f'Received new bot data: [{bot_data}] from [{method.routing_key}]')
     with bot_queue_lock:
         if bot_data['state'] == 0 or bot_data['state'] == 2:
@@ -75,7 +75,7 @@ def from_bot_callback(ch, method, properties, body) -> None:
         bot_data_event.set()
 
 def get_all_bots(ch, method, properties, body):
-    bot_data = decode_json_object(body)
+    bot_data = decodeJsonObject(body)
     bot_id = bot_data['id']
 
     if bot_id not in bot_queue_dict:
@@ -99,12 +99,12 @@ def publish_task(publisher:Publisher) -> None:
 
             with bot_queue_lock:
                     bot_curr_loc = bot_queue_dict.copy()
-                    selected_task,bot_queue = compare_userLoc_botLoc(task,bot_curr_loc)
+                    selected_task,bot_queue = compareUserLocBotLoc(task,bot_curr_loc)
 
             selected_task = json.dumps(selected_task)
 
             print(f'Published selected task [{selected_task}] to [{bot_queue}]')
-            publisher.publish_to_queue(message=selected_task, queue=bot_queue)
+            publisher.publishToQueue(message=selected_task, queue=bot_queue)
 
             task_queue.task_done()
 
@@ -127,7 +127,7 @@ def notify(publisher:Publisher,message=''):
         new_task_event.wait()
         try:
             print("Notifying the bots")
-            publisher.publish_to_topic(message=message,exchange='notification_topic',routing_key='notification.info')
+            publisher.publishToTopic(message=message,exchange='notification_topic',routing_key='notification.info')
         except (pika.exceptions.StreamLostError, pika.exceptions.AMQPChannelError) as e:
             print(f"Error during notification publishing: {e}. Reconnecting...")
             publisher.connect()  # Reconnect
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     pub_bot_task.connect()
 
     # receives an initial notification from every bot that they exist
-    sub_one_time_notification.subscribe_to_queue_tmp(get_all_bots,'registration')
+    sub_one_time_notification.subscribeToQueueTmp(get_all_bots,'registration')
     sub_one_time_notification.disconnect()
 
     bot_num = len(bot_queue_dict) # amount of bots available in the system
@@ -207,10 +207,10 @@ if __name__ == '__main__':
     #set_notification_event = threading.Thread(target=check_queue)
 
     # subscribe to the tasks send from the webserver (queue = 'rawTasksQueue')
-    sub_webserver_task_queue_Thread = threading.Thread(target=sub_webserver_task_queue.subscribe_to_queue, args=(from_webserver_task_callback,'rawTaskQueue'))
+    sub_webserver_task_queue_Thread = threading.Thread(target=sub_webserver_task_queue.subscribeToQueue, args=(from_webserver_task_callback,'rawTaskQueue'))
 
     # subscribe to the current location data from the bots (queues = 'currLoc.*)
-    sub_botCurrLoc_Thread = threading.Thread(target=sub_bot_curr_loc.subscribe_to_topic, args=(from_bot_callback,'bot_locs_topic','bot_locs','currLoc.*'))
+    sub_botCurrLoc_Thread = threading.Thread(target=sub_bot_curr_loc.subscribeToTopic, args=(from_bot_callback,'bot_locs_topic','bot_locs','currLoc.*'))
 
     # publish a notification inside the queue 'notification' to the bots to notify them of new tasks
     # and trigger their publish method which sends their current location data

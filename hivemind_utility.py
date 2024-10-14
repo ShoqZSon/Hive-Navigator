@@ -1,6 +1,6 @@
 import json
 
-def decode_json_object(json_object) -> dict:
+def decodeJsonObject(json_object) -> dict:
     """Decodes the content of the jsonObject to a string and then to dictionary
     :param json_object: jsonObject to be decoded
     :return: dict of a task"""

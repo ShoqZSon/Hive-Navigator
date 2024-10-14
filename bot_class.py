@@ -51,13 +51,13 @@ class Bot(Node):
 
             botData = self.getBotData()
             print("publishing the bot data now")
-            publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
+            publisher.publishToTopic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
 
             time.sleep(1)
 
             self.publish_event.clear()
 
-    def addTask_callback(self,ch, method, properties, body):
+    def addTaskCallback(self,ch, method, properties, body):
         task = json.loads(body)
         if task not in self.taskQueue.queue:
             self.taskQueue.put(task)
@@ -73,7 +73,7 @@ class Bot(Node):
             x = task['x']
             y = task['y']
 
-            self.set_navigation_goal(x,y)
+            self.setNavigationGoal(x,y)
 
             self.taskQueue.task_done()
 
@@ -81,7 +81,7 @@ class Bot(Node):
             self.state = 0
             time.sleep(1)
 
-    def set_navigation_goal(self, x, y):
+    def setNavigationGoal(self, x, y):
         request = NavigateToPose.Request()
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
