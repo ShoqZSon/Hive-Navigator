@@ -19,6 +19,7 @@ class Bot(Node):
 
         state -> 0 = idle, 1 on the job, 2 back to source # WIP on the naming
         """
+        rclpy.init()
         super().__init__('bot_node')
         self.id = bot_id
         self.hallNr = hallNr
@@ -28,7 +29,6 @@ class Bot(Node):
         self.taskQueue = queue.Queue()
         self.publish_event = threading.Event()
         self.execute_event = threading.Event()
-        rclpy.init()
 
     def getBotData(self):
         """Pack the bot's data into a JSON string."""
