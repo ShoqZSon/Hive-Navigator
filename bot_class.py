@@ -11,10 +11,13 @@ class Bot(Node):
     def __init__(self,bot_id=0,floor=0, hallNr=0):
         """
 
-        :param bot_id:
-        :param floor:
-        :param hallNr:
-        state: 0 = idle, 1 on the job, 2 back to source # WIP on the naming
+        Parameters
+        ----------
+        bot_id
+        floor
+        hallNr
+
+        state -> 0 = idle, 1 on the job, 2 back to source # WIP on the naming
         """
         super().__init__('bot_node')
         self.id = bot_id
@@ -28,7 +31,7 @@ class Bot(Node):
         rclpy.init()
 
     def getBotData(self):
-        """Pack the bot's nates into a JSON string."""
+        """Pack the bot's data into a JSON string."""
         data = {
             'id': self.id,
             'hall': self.hallNr,
@@ -48,13 +51,13 @@ class Bot(Node):
 
             botData = self.getBotData()
             print("publishing the bot data now")
-            publisher.publish_to_topic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
+            publisher.publishToTopic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
 
             time.sleep(1)
 
             self.publish_event.clear()
 
-    def addTask_callback(self,ch, method, properties, body):
+    def addTaskCallback(self,ch, method, properties, body):
         task = json.loads(body)
         if task not in self.taskQueue.queue:
             self.taskQueue.put(task)
@@ -70,7 +73,7 @@ class Bot(Node):
             x = task['x']
             y = task['y']
 
-            self.set_navigation_goal(x,y)
+            self.setNavigationGoal(x,y)
 
             self.taskQueue.task_done()
 
@@ -78,7 +81,7 @@ class Bot(Node):
             self.state = 0
             time.sleep(1)
 
-    def set_navigation_goal(self, x, y):
+    def setNavigationGoal(self, x, y):
         request = NavigateToPose.Request()
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
@@ -105,10 +108,15 @@ class Bot(Node):
         return self.floor
 
     def getCoordinates(self):
-        return self.Coordinates
+        return self.coordinates
 
     def getTaskQueue(self):
         return self.taskQueue
 
     def getState(self):
         return self.state
+
+    def setXY(self,x,y):
+        self.coordinates['x'] = x
+        self.coordinates['y'] = y
+
