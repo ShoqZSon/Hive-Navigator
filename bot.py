@@ -56,7 +56,7 @@ pub_bot_curr_loc_Thread = threading.Thread(target=bot.publishBotData,args=(pub_b
 # subscribes the notification queue in order to let the bot know when to publish its data
 sub_task_notification_Thread = threading.Thread(target=sub_task_notification.subscribeToTopic,args=(bot.notificationCallback,'notification_topic',f'notifications_{bot.getId()}','notification.*'))
 # subscribes to its own task queue for incoming tasks
-sub_bot_tasks_Thread = threading.Thread(target=sub_bot_tasks.subscribeToQueue, args=(bot.addTask_callback,f'tasks.{bot.getId()}'))
+sub_bot_tasks_Thread = threading.Thread(target=sub_bot_tasks.subscribeToQueue, args=(bot.addTaskCallback,f'tasks.{bot.getId()}'))
 
 executing_tasks_Thread = threading.Thread(target=bot.executeTask)
 
