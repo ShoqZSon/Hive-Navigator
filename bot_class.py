@@ -5,7 +5,7 @@ import threading
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
-from nav2_msgs.srv import NavigateToPose
+from nav2_msgs.action import NavigateToPose
 
 class Bot(Node):
     def __init__(self,bot_id=0,floor=0, hallNr=0):
