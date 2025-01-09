@@ -3,6 +3,7 @@ import queue
 import time
 import threading
 import rclpy
+from rclpy.action import ActionClient
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
@@ -31,6 +32,9 @@ class Bot(Node):
         self.taskCount = 0 # count for the current session, does not get saved permanently
         self.publish_event = threading.Event()
         self.execute_event = threading.Event()
+
+        # Action client for NavigateToPose
+        self._navigate_action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
 
     def getBotData(self):
         """Pack the bot's data into a JSON string."""
@@ -90,7 +94,6 @@ class Bot(Node):
             time.sleep(0.5)
 
     def setNavigationGoal(self, x, y):
-        request = NavigateToPose.Request()
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
         goal_pose.header.stamp = self.get_clock().now().to_msg()
@@ -98,13 +101,28 @@ class Bot(Node):
         goal_pose.pose.position.y = y
         goal_pose.pose.orientation.w = 1.0
 
-        request.pose = goal_pose
-        future = self.client.call_async(request)
-        rclpy.spin_until_future_complete(self, future)
-        if future.result() is not None:
-            self.get_logger().info(f'[{self.id}] Goal set to x: {x}, y: {y} successfully!')
-        else:
-            self.get_logger().error(f'[{self.id}] Failed to set goal')
+        goal_msg = NavigateToPose.Goal()
+        goal_msg.pose = goal_pose
+
+        self._navigate_action_client.wait_for_server()
+        self.get_logger().info(f'[{self.id}] Sending goal to NavigateToPose action server...')
+
+        future = self._navigate_action_client.send_goal_async(goal_msg)
+        future.add_done_callback(self.goal_response_callback)
+
+    def goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().error(f'[{self.id}] Navigation goal was rejected!')
+            return
+
+        self.get_logger().info(f'[{self.id}] Navigation goal accepted. Waiting for result...')
+        result_future = goal_handle.get_result_async()
+        result_future.add_done_callback(self.result_callback)
+
+    def result_callback(self, future):
+        result = future.result().result
+        self.get_logger().info(f'[{self.id}] Navigation completed with result: {result}')
 
     def getId(self):
         return self.id
