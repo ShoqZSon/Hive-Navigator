@@ -27,6 +27,8 @@ class Bot(Node):
         self.coordinates = {'x': 0, 'y': 0}
         self.state = 0
         self.taskQueue = queue.Queue()
+        self.currentTask = None
+        self.taskCount = 0 # count for the current session, does not get saved permanently
         self.publish_event = threading.Event()
         self.execute_event = threading.Event()
 
@@ -38,7 +40,9 @@ class Bot(Node):
             'floor': self.floor,
             'x': self.coordinates['x'],
             'y': self.coordinates['y'],
-            'state': self.state
+            'state': self.state,
+            'currentTask': self.currentTask,
+            'taskCount': self.taskCount
         }
         return json.dumps(data)
 
@@ -50,7 +54,7 @@ class Bot(Node):
             self.publish_event.wait()
 
             botData = self.getBotData()
-            print("publishing the bot data now")
+            print(f'[Bot_{self.id}] publishing the bot data now')
             publisher.publishToTopic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
 
             time.sleep(1)
@@ -61,25 +65,30 @@ class Bot(Node):
         task = json.loads(body)
         if task not in self.taskQueue.queue:
             self.taskQueue.put(task)
-            print(f"Added task: {task} to taskQueue of bot {self.id}")
+            print(f'[Bot_{self.id}] Added task: {task} to taskQueue of bot {self.id}')
             self.execute_event.set()
 
     def executeTask(self):
+        print(f'[Bot_{self.id}] Attempting to execute task...')
         while True:
             self.execute_event.wait()
             task = self.taskQueue.get()
+            self.currentTask = task
+            print(f'[Bot_{self.id}] Executing task: {self.currentTask}')
             self.state = 1
 
             x = task['x']
             y = task['y']
 
+            print(f'[Bot_{self.id}] Setting the navigation goal: [{x},{y}]')
             self.setNavigationGoal(x,y)
 
+            print(f'[Bot_{self.id}] Task done')
             self.taskQueue.task_done()
 
             self.execute_event.clear()
             self.state = 0
-            time.sleep(1)
+            time.sleep(0.5)
 
     def setNavigationGoal(self, x, y):
         request = NavigateToPose.Request()
@@ -94,9 +103,9 @@ class Bot(Node):
         future = self.client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         if future.result() is not None:
-            self.get_logger().info(f'Goal set to x: {x}, y: {y} successfully!')
+            self.get_logger().info(f'[Bot_{self.id}] Goal set to x: {x}, y: {y} successfully!')
         else:
-            self.get_logger().error('Failed to set goal')
+            self.get_logger().error(f'[Bot_{self.id}] Failed to set goal')
 
     def getId(self):
         return self.id
