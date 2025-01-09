@@ -54,7 +54,7 @@ class Bot(Node):
             self.publish_event.wait()
 
             botData = self.getBotData()
-            print(f'[Bot_{self.id}] publishing the bot data now')
+            print(f'[{self.id}] publishing the bot data now')
             publisher.publishToTopic(botData,'bot_locs_topic',f'currLoc.{self.getId()}')
 
             time.sleep(1)
@@ -65,25 +65,24 @@ class Bot(Node):
         task = json.loads(body)
         if task not in self.taskQueue.queue:
             self.taskQueue.put(task)
-            print(f'[Bot_{self.id}] Added task: {task} to taskQueue of bot {self.id}')
+            print(f'[{self.id}] Added task: {task} to taskQueue of {self.id}')
             self.execute_event.set()
 
     def executeTask(self):
-        print(f'[Bot_{self.id}] Attempting to execute task...')
         while True:
             self.execute_event.wait()
             task = self.taskQueue.get()
             self.currentTask = task
-            print(f'[Bot_{self.id}] Executing task: {self.currentTask}')
+            print(f'[{self.id}] Executing task: {self.currentTask}')
             self.state = 1
 
-            x = task['x']
-            y = task['y']
+            x = task['destination'].split(',')[-2]
+            y = task['destination'].split(',')[-1]
 
-            print(f'[Bot_{self.id}] Setting the navigation goal: [{x},{y}]')
+            print(f'[{self.id}] Setting the navigation goal: [{x},{y}]')
             self.setNavigationGoal(x,y)
 
-            print(f'[Bot_{self.id}] Task done')
+            print(f'[{self.id}] Task done')
             self.taskQueue.task_done()
 
             self.execute_event.clear()
@@ -103,9 +102,9 @@ class Bot(Node):
         future = self.client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         if future.result() is not None:
-            self.get_logger().info(f'[Bot_{self.id}] Goal set to x: {x}, y: {y} successfully!')
+            self.get_logger().info(f'[{self.id}] Goal set to x: {x}, y: {y} successfully!')
         else:
-            self.get_logger().error(f'[Bot_{self.id}] Failed to set goal')
+            self.get_logger().error(f'[{self.id}] Failed to set goal')
 
     def getId(self):
         return self.id
