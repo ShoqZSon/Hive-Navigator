@@ -9,7 +9,7 @@ from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
 
 class Bot(Node):
-    def __init__(self,bot_id=0,floor=0, hallNr=0):
+    def __init__(self,bot_id=0,floor=0, hallNr=0,x=0,y=0):
         """
 
         Parameters
@@ -21,20 +21,23 @@ class Bot(Node):
         state -> 0 = idle, 1 on the job, 2 back to source # WIP on the naming
         """
         rclpy.init()
-        super().__init__('bot_node')
+
         self.id = bot_id
         self.hallNr = hallNr
         self.floor = floor
-        self.coordinates = {'x': 0, 'y': 0}
+        self.coordinates = {'x': x, 'y': y}
         self.state = 0
         self.taskQueue = queue.Queue()
         self.currentTask = None
         self.taskCount = 0 # count for the current session, does not get saved permanently
         self.publish_event = threading.Event()
         self.execute_event = threading.Event()
+        self.action_client_name = f'{bot_id}_nav2pose'
+
+        super().__init__(f'{bot_id}_node')
 
         # Action client for NavigateToPose
-        self._navigate_action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+        self._navigate_action_client = ActionClient(self, NavigateToPose, self.action_client_name)
 
     def getBotData(self):
         """Pack the bot's data into a JSON string."""
@@ -80,11 +83,11 @@ class Bot(Node):
             print(f'[{self.id}] Executing task: {self.currentTask}')
             self.state = 1
 
-            x = task['destination'].split(',')[-2]
-            y = task['destination'].split(',')[-1]
+            dest_x = task['destination'].split(',')[-2]
+            dest_y = task['destination'].split(',')[-1]
 
-            print(f'[{self.id}] Setting the navigation goal: [{x},{y}]')
-            self.setNavigationGoal(x,y)
+            print(f'[{self.id}] Setting the navigation goal: [{dest_x},{dest_y}]')
+            self.setNavigationGoal(dest_x,dest_y)
 
             print(f'[{self.id}] Task done')
             self.taskQueue.task_done()
