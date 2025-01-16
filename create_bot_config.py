@@ -28,21 +28,25 @@ if __name__ == '__main__':
     # Parse the arguments
     args = parser.parse_args()
 
+    # Convert arguments to a dictionary
     args_dict = vars(args)
-    args_dict['config_name'] = args.config_name + '.json'
-    for arg_name, arg_value in args_dict.items():
-        print(f"{arg_name}: {arg_value}")
 
+    # Add the json extension to the chosen config_file name
+    args_dict['config_name'] = args.config_name + '.json'
+
+    # Create the configs folder and paths
     curr_dir = Path(__file__).parent
     config_dir = curr_dir / 'configs'
     config_dir.mkdir(exist_ok=True)
 
     config_name = args.config_name
     config_path = config_dir / config_name
+    # Check if the config given exists or not
     if config_path.exists():
         print(f'Config file for {args_dict['config_name']} already exists.')
         print(f'Overwrites are not allowed.')
         exit(-1)
+
     try:
         create_file(config_path, args_dict)
         print(f"Config file created successfully at {config_path}")

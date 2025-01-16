@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 
 # TODO: maybe outsource this config search for better testability
+# Checks if there are more than 1 config files with the variable "type"
+# if True => the script exits with no config content returned
 curr_dir = Path(__file__).parent
 config_dir = curr_dir / 'configs'
 configs_count = 0
